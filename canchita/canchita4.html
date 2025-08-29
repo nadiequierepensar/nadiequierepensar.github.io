@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="es">
 <head>
+<!-- Favicon – Canchita -->
+<link rel="icon" type="image/png" href="../images/canchita.png" sizes="any">
+<link rel="shortcut icon" href="../images/canchita.png">
+<link rel="apple-touch-icon" href="../images/canchita.png">
   <!-- Meta base -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -31,8 +35,8 @@
 
       <!-- Dos caminos: Sí → Paso 5 / No → salta a Paso 7 -->
       <div class="stack">
-        <button id="si" class="btn btn-yes" type="button">Sí, alquilamos</button>
-        <button id="no" class="btn btn-no"  type="button">No, no alquilamos</button>
+        <button id="si" class="btn btn-yes" type="button">Sí, alquilamos 🎾</button>
+        <button id="no" class="btn btn-no"  type="button">No, no alquilamos 😎</button>
       </div>
     </div>
   </main>
@@ -58,7 +62,7 @@
         const s = getState();
         s.equipamiento = Object.assign({ hubo: true }, s.equipamiento);
         setState(s);
-        if (window.startPageLeave) startPageLeave(NEXT_SI, true);
+        if (window.startPageLeave) startPageLeave(NEXT_SI);
         else location.href = NEXT_SI;
       });
 
@@ -67,7 +71,7 @@
         const s = getState();
         s.equipamiento = { hubo: false, precio: 0, imputadoA: 'todos', jugadores: [] };
         setState(s);
-        if (window.startPageLeave) startPageLeave(NEXT_NO, true);
+        if (window.startPageLeave) startPageLeave(NEXT_NO);
         else location.href = NEXT_NO;
       });
     })();

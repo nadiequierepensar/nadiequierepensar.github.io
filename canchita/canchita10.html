@@ -1,37 +1,59 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <!-- Meta base -->
+<!-- Favicon – Canchita -->
+<link rel="icon" type="image/png" href="../images/canchita.png" sizes="any">
+<link rel="shortcut icon" href="../images/canchita.png">
+<link rel="apple-touch-icon" href="../images/canchita.png">
+  <!-- Meta & PWA -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-
-  <!-- Android / Desktop: color de la barra del navegador -->
   <meta name="theme-color" content="#2a892e">
-
-  <!-- iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- Título y estilos -->
-  <title>Canchita — Paso 10</title>
+  <title>Canchita — Resumen</title>
   <link rel="stylesheet" href="../css/app.css?v=6">
+
   <style>
+    /* Contenedor (igual que juntadas/ensayo) */
+    .c10-wrap{
+      width: min(720px, 94vw);
+      margin: 0 auto;
+      padding: 24px 20px 24px;
+    }
+
     /* Resumen */
     .result-wrap{ display:grid; gap:18px; }
-    .result-title{ color:#fff; font-weight:900; font-size:2rem; line-height:1.2; margin-top:24px; text-align:left; }
+
+    /* H1 alineado al borde interno (sin márgenes laterales) */
+    .result-title{
+      color:#fff; font-weight:900; font-size:2rem; line-height:1.2;
+      margin:24px 0 0 0;
+      text-align:left;
+    }
+
     .result-sub{ color:#fff; font-size:1.1rem; margin-top:8px; }
+
     .list-results{ display:grid; gap:10px; margin-top:4px; }
-    .line{ display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:12px; background:rgba(0,0,0,.12); }
-    .name{ color:#fff; font-size:1.05rem; }
-    .amt{ color:#fff; font-weight:800; }
+
+    /* Pastillas: Grid (texto izq 1fr, monto der auto) */
+    .page-canchita .list-results .line{
+      display:grid; grid-template-columns:1fr auto; align-items:center;
+      column-gap:10px;
+      padding:10px 12px; border-radius:12px; background:rgba(0,0,0,.12);
+      justify-content: initial; /* neutraliza space-between heredado si lo hubiera */
+    }
+    .page-canchita .list-results .line .name{ color:#fff; font-size:1.05rem; min-width:0; }
+    .page-canchita .list-results .line .amt{ color:#fff; font-weight:800; white-space:nowrap; }
 
     /* Ya no necesitamos espacio extra para botones fijos */
-    .final-wrap{ padding-bottom: 24px; }
+    .final-wrap{ padding-bottom:24px; }
 
-    /* Botones al final del contenido (no fijos) */
+    /* Botones al final (no fijos) */
     .actions-bottom{
-      display:flex; justify-content:center; gap:36px;
-      margin:24px auto 8px;
+      display:flex; justify-content:center; gap:28px;
+      margin:22px auto 6px;
     }
     .fab-stack{ display:grid; gap:6px; justify-items:center; }
     .fab{
@@ -42,18 +64,36 @@
     .fab.green{ background:#00C853; }  /* Reiniciar */
     .fab.red{   background:#FF0202; }  /* Compartir */
     .fab-label{ color:#fff; font-size:.85rem; opacity:.95; }
+
+    /* Tweaks responsive */
+    @media (max-width:420px){
+      .result-title{ font-size:1.8rem; }
+      .page-canchita .list-results .line{ column-gap:8px; padding:10px 10px; }
+      .actions-bottom{ gap:22px; }
+      .fab{ width:58px; height:58px; font-size:20px; }
+    }
   </style>
 </head>
+
 <body class="page-canchita">
   <main>
-    <div class="canchita-wrap final-wrap">
+    <div class="c10-wrap final-wrap">
       <div class="result-wrap">
         <h1 id="tit" class="result-title">Resultado del partido</h1>
         <div id="sub" class="result-sub">Cada uno:</div>
         <div id="lista" class="list-results"></div>
       </div>
+	  
+<!-- Donar -->
+<div class="donate-wrap">
+  <a class="donate-btn"
+     href="https://cafecito.app/nadiequierepensar"
+     target="_blank" rel="noopener noreferrer">
+    ¿Les sirvió? Invítenme un cafecito ☕
+  </a>
+</div>
 
-      <!-- Botones al final del contenido -->
+      <!-- Botones al final, en flujo -->
       <div class="actions-bottom">
         <div class="fab-stack">
           <button id="reiniciar" class="fab green" title="Reiniciar">↺</button>
@@ -67,11 +107,10 @@
     </div>
   </main>
 
-  <!-- Scripts: transiciones y lógica -->
   <script src="../js/nav-transitions.js?v=3"></script>
   <script>
     (function(){
-      const KEY='canchita_state_v1';
+      const KEY = 'canchita_state_v1';
       const BACK_TO_NAMES = 'canchita2.html';
 
       // Leer estado
@@ -118,11 +157,11 @@
 
       const totalGeneral = (precioCanchita|0) + (equipPrecio|0) + (ttPrecio|0);
 
-      // Título y subtítulo
+      // Título fijo y subtítulo con total + “cada uno”
       document.getElementById('tit').textContent = 'Resultado del partido';
-      document.getElementById('sub').textContent = `Total: ${money(totalGeneral)}  •  Cada uno:`;
+      document.getElementById('sub').textContent = `Total: ${money(totalGeneral)} • Cada uno:`;
 
-      // Render de la lista por persona
+      // Lista por persona
       const ul = document.getElementById('lista');
       nombres.forEach((name, idx) => {
         const pagaEquip = huboEquip && equipIdx.includes(idx);
@@ -143,7 +182,7 @@
         else location.replace('../menu.html');
       });
 
-      // Compartir → Web Share si existe, sino copia al portapapeles
+      // Compartir
       document.getElementById('compartir').addEventListener('click', async () => {
         const lines = [];
         lines.push('Partido');

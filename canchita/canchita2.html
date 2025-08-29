@@ -1,6 +1,11 @@
 <!doctype html>
 <html lang="es">
 <head>
+<!-- Favicon – Canchita -->
+<link rel="icon" type="image/png" href="../images/canchita.png" sizes="any">
+<link rel="shortcut icon" href="../images/canchita.png">
+<link rel="apple-touch-icon" href="../images/canchita.png">
+
   <!-- Meta base -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -117,7 +122,7 @@
       if (nombres.some(v => !v)) { toggleNext(); return; }
 
       sessionStorage.setItem(KEY, JSON.stringify({ ...st, jugadores: nombres }));
-      if (window.startPageLeave) startPageLeave(NEXT, true);
+      if (window.startPageLeave) startPageLeave(NEXT);
       else location.href = NEXT;
     });
   })();

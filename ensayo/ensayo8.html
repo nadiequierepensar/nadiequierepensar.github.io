@@ -1,39 +1,60 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Favicon – Ensayo -->
+<link rel="icon" type="image/png" href="../images/ensayo.png" sizes="any">
+<link rel="shortcut icon" href="../images/ensayo.png">
+<link rel="apple-touch-icon" href="../images/ensayo.png">
 
-<!-- Android / Desktop: color de la barra del navegador -->
-<meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
-
-<!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-
+  <!-- Meta & PWA -->
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ensayo — Paso 8</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#2c2a89">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>Ensayo — Resumen</title>
   <link rel="stylesheet" href="../css/app.css?v=6">
+
   <style>
+    /* Contenedor (igual que juntadas/canchita) */
+    .e8-wrap{
+      width: min(720px, 94vw);
+      margin: 0 auto;
+      padding: 24px 20px 24px;
+    }
+
     /* Resumen */
     .result-wrap{ display:grid; gap:18px; }
-    .result-title{ color:#fff; font-weight:900; font-size:2rem; line-height:1.2; margin-top:24px; text-align:left; }
+
+    /* H1 alineado al borde interno (sin márgenes laterales) */
+    .result-title{
+      color:#fff; font-weight:900; font-size:2rem; line-height:1.2;
+      margin:24px 0 0 0;
+      text-align:left;
+    }
+
     .result-sub{ color:#fff; font-size:1.1rem; margin-top:8px; }
+
     .list-results{ display:grid; gap:10px; margin-top:4px; }
-    .line{ display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:12px; background:rgba(0,0,0,.12); }
-    .name{ color:#fff; font-size:1.05rem; }
-    .amt{ color:#fff; font-weight:800; }
 
-    /* Más espacio al final para que no tape los botones */
-    .final-wrap{ padding-bottom: calc(128px + env(safe-area-inset-bottom, 0px)); }
+    /* Pastillas: Grid (texto izq 1fr, monto dere auto) */
+    .page-ensayo1 .list-results .line{
+      display:grid; grid-template-columns:1fr auto; align-items:center;
+      column-gap:10px;
+      padding:10px 12px; border-radius:12px; background:rgba(0,0,0,.12);
+      justify-content: initial; /* neutraliza space-between heredado si lo hubiera */
+    }
+    .page-ensayo1 .list-results .line .name{ color:#fff; font-size:1.05rem; min-width:0; }
+    .page-ensayo1 .list-results .line .amt{ color:#fff; font-weight:800; white-space:nowrap; }
 
-    /* Botones inferiores fijos (sin difuminado) */
+    /* Ya no necesitamos espacio extra para botones fijos */
+    .final-wrap{ padding-bottom:24px; }
+
+    /* Botones al final (no fijos) */
     .actions-bottom{
-      position: fixed; left:0; right:0;
-      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-      display:flex; justify-content:center; gap:36px;
-      z-index: 10; background: transparent;
+      display:flex; justify-content:center; gap:28px;
+      margin:22px auto 6px;
     }
     .fab-stack{ display:grid; gap:6px; justify-items:center; }
     .fab{
@@ -44,27 +65,45 @@
     .fab.green{ background:#00C853; }  /* Reiniciar */
     .fab.red{   background:#FF0202; }  /* Compartir */
     .fab-label{ color:#fff; font-size:.85rem; opacity:.95; }
+
+    /* Tweaks responsive */
+    @media (max-width:420px){
+      .result-title{ font-size:1.8rem; }
+      .page-ensayo1 .list-results .line{ column-gap:8px; padding:10px 10px; }
+      .actions-bottom{ gap:22px; }
+      .fab{ width:58px; height:58px; font-size:20px; }
+    }
   </style>
 </head>
+
 <body class="page-ensayo1">
   <main>
-    <div class="ensayo-wrap final-wrap">
+    <div class="e8-wrap final-wrap">
       <div class="result-wrap">
-        <h1 id="tit" class="result-title">Resultado del ensayo</h1>
-        <div class="result-sub">Cada uno:</div>
+        <h1 id="tit" class="result-title">Resumen del ensayo</h1>
+        <div id="sub" class="result-sub">Cada uno:</div>
         <div id="lista" class="list-results"></div>
       </div>
-    </div>
 
-    <!-- Botones fijos, abajo de todo -->
-    <div class="actions-bottom">
-      <div class="fab-stack">
-        <button id="reiniciar" class="fab green" title="Reiniciar">↺</button>
-        <div class="fab-label">Reiniciar</div>
-      </div>
-      <div class="fab-stack">
-        <button id="compartir" class="fab red" title="Compartir">⤴</button>
-        <div class="fab-label">Compartir</div>
+<!-- Donar -->
+<div class="donate-wrap">
+  <a class="donate-btn"
+     href="https://cafecito.app/nadiequierepensar"
+     target="_blank" rel="noopener noreferrer">
+    ¿Les sirvió? Invítenme un cafecito ☕
+  </a>
+</div>
+
+      <!-- Botones al final, en flujo -->
+      <div class="actions-bottom">
+        <div class="fab-stack">
+          <button id="reiniciar" class="fab green" title="Reiniciar">↺</button>
+          <div class="fab-label">Reiniciar</div>
+        </div>
+        <div class="fab-stack">
+          <button id="compartir" class="fab red" title="Compartir">⤴</button>
+          <div class="fab-label">Compartir</div>
+        </div>
       </div>
     </div>
   </main>
@@ -104,8 +143,9 @@
       const perAlcohol = tomCount > 0 ? Math.trunc(valorAlcohol / tomCount) : 0;
       const totalGeneral = (valorSala|0) + (valorAlcohol|0);
 
-      // Título
-      document.getElementById('tit').textContent = `${banda}, el total es de ${money(totalGeneral)}`;
+      // Título fijo y subtítulo con total + “cada uno”
+      document.getElementById('tit').textContent = 'Resumen del ensayo';
+      document.getElementById('sub').textContent = `Total: ${money(totalGeneral)} • Cada uno:`;
 
       // Lista por persona
       const ul = document.getElementById('lista');
@@ -127,7 +167,7 @@
         else location.replace('../menu.html');
       });
 
-      // Compartir → Web Share si existe, sino copia
+      // Compartir
       document.getElementById('compartir').addEventListener('click', async () => {
         const lines = [];
         lines.push(`Banda: ${banda}`);
@@ -144,7 +184,7 @@
 
         try{
           if (navigator.share) {
-            await navigator.share({ title: `Ensayo — ${banda}`, text });
+            await navigator.share({ title: 'Ensayo — Resumen', text });
           } else if (navigator.clipboard && window.isSecureContext) {
             await navigator.clipboard.writeText(text);
             alert('Resumen copiado al portapapeles.');

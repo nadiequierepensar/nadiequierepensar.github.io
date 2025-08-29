@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="es">
 <head>
+<!-- Favicon – Canchita -->
+<link rel="icon" type="image/png" href="../images/canchita.png" sizes="any">
+<link rel="shortcut icon" href="../images/canchita.png">
+<link rel="apple-touch-icon" href="../images/canchita.png">
   <!-- Meta base -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -57,7 +61,7 @@
         const s = getState();
         s.tercer_tiempo = { ...(s.tercer_tiempo || {}), hubo: true };
         setState(s);
-        if (window.startPageLeave) startPageLeave(NEXT_SI, true);
+        if (window.startPageLeave) startPageLeave(NEXT_SI);
         else location.href = NEXT_SI;
       });
 
@@ -66,7 +70,7 @@
         const s = getState();
         s.tercer_tiempo = { hubo: false, precio: 0, imputadoA: 'todos', jugadores: [] };
         setState(s);
-        if (window.startPageLeave) startPageLeave(NEXT_NO, true);
+        if (window.startPageLeave) startPageLeave(NEXT_NO);
         else location.href = NEXT_NO;
       });
     })();

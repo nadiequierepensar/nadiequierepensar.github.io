@@ -12,7 +12,7 @@
   <link rel="manifest" href="/manifest.webmanifest">
 
   <!-- Íconos del sitio / PWA -->
-  <link rel="icon" href="images/logo-cuadrado-512.png" sizes="any">
+  <link rel="icon" href="images/menu.png" sizes="any">
   <link rel="apple-touch-icon" sizes="192x192" href="./images/logo-cuadrado-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="./images/logo-cuadrado-512.png">
 
@@ -60,6 +60,8 @@
             <img src="images/canchita.png" alt="Canchita">
           </a>
         </div>
+      </section>
+    </div>
 
     <!-- Botón inferior con easter egg -->
     <div class="footer">
@@ -112,6 +114,82 @@
       sessionStorage.setItem('a2hs_tip', '1');
       setTimeout(() => tip.remove(), 7000);
     }
+  </script>
+
+  <!-- Reset de estado (atajos + long-press + URL) -->
+  <script>
+  /* ============================
+     Reset de estado (Canchita/Juntadas/Ensayo)
+     - URL: menu.html?reset=1
+     - Teclado: Ctrl/Cmd + Alt + R
+     - Long-press (800ms) sobre el botón .cta (CharlyCorp®)
+     - Consola: window.resetAppState()
+     ============================ */
+  (function(){
+    // Claves explícitas + patrón por si aparece otra variante (_state o _state_vN)
+    const EXPLICIT_KEYS = ['canchita_state_v1', 'ensayo_state', 'juntadas_state'];
+
+    function clearStates(){
+      try{
+        const toRemove = new Set(EXPLICIT_KEYS);
+        for (let i = 0; i < sessionStorage.length; i++){
+          const k = sessionStorage.key(i);
+          if (/_state($|_v\d+$)/.test(k)) toRemove.add(k);
+        }
+        toRemove.forEach(k => sessionStorage.removeItem(k));
+      }catch(e){ console.warn('No se pudo limpiar sessionStorage', e); }
+    }
+
+    function resetAndNotify(){
+      clearStates();
+      alert('Se reiniciaron los datos temporales de la app.');
+    }
+
+    // 1) URL ?reset=1
+    if (new URLSearchParams(location.search).has('reset')){
+      resetAndNotify();
+      // quitar el parámetro sin recargar
+      const url = new URL(location.href);
+      url.searchParams.delete('reset');
+      history.replaceState({}, '', url.pathname + (url.search ? '?' + url.searchParams.toString() : '') + url.hash);
+    }
+
+    // 2) Atajo de teclado: Ctrl/Cmd + Alt + R
+    window.addEventListener('keydown', (e) => {
+      const isR = (e.key || '').toLowerCase() === 'r';
+      if (isR && e.altKey && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        resetAndNotify();
+      }
+    });
+
+    // 3) Long-press (800ms) sobre el botón CharlyCorp® (.cta)
+    (function attachLongPress(){
+      const cta = document.querySelector('.cta');
+      if (!cta) return;
+      let timer = null, fired = false;
+      const start = (ev) => {
+        fired = false;
+        timer = setTimeout(() => { fired = true; resetAndNotify(); }, 800);
+      };
+      const end = (ev) => {
+        clearTimeout(timer);
+        if (fired) {
+          // evitar que dispare el onclick original si el reset ya ocurrió
+          ev.preventDefault();
+          ev.stopPropagation();
+        }
+      };
+      cta.addEventListener('touchstart', start, {passive:true});
+      cta.addEventListener('touchend', end);
+      cta.addEventListener('mousedown', start);
+      cta.addEventListener('mouseup', end);
+      cta.addEventListener('click', (ev) => { if (fired) { ev.preventDefault(); ev.stopImmediatePropagation(); } }, true);
+    })();
+
+    // 4) Consola
+    window.resetAppState = resetAndNotify;
+  })();
   </script>
 </body>
 </html>

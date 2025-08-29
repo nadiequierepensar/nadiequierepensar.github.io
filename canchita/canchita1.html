@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="es">
 <head>
+<!-- Favicon – Canchita -->
+<link rel="icon" type="image/png" href="../images/canchita.png" sizes="any">
+<link rel="shortcut icon" href="../images/canchita.png">
+<link rel="apple-touch-icon" href="../images/canchita.png">
   <!-- Meta base -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -60,7 +64,7 @@
       function saveAndGo(){
         const val = parseInt(sel.value, 10);
         if (!Number.isFinite(val) || val < 1) {
-          alert('Elegí la cantidad de jugadores');
+          alert('No elegiste nada pancho');
           sel.focus();
           return;
         }
@@ -71,7 +75,7 @@
         state.cantidad = val;
         sessionStorage.setItem(KEY, JSON.stringify(state));
 
-        if (window.startPageLeave) startPageLeave(NEXT, true);
+        if (window.startPageLeave) startPageLeave(NEXT);
         else location.href = NEXT;
       }
 

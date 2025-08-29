@@ -1,60 +1,63 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
-<!-- Android / Desktop: color de la barra del navegador -->
-<meta name="theme-color" content="#000000">  <!-- poné #000000 en páginas negras como menu.html -->
-
-<!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#000000">
-
-<!-- Íconos -->
-<link rel="icon" href="images/logo-cuadrado-512.png" sizes="any">
-<link rel="apple-touch-icon" sizes="192x192" href="./images/logo-cuadrado-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="./images/logo-cuadrado-512.png">
-
-<!-- Open Graph / WhatsApp -->
-<meta property="og:title" content="Nadie quiere pensar — Calculadora para ensayos, juntadas y canchitas">
-<meta property="og:description" content="Sacá la cuenta por persona en 3 minutos.">
-<meta property="og:image" content="https://nadiequierepensar.github.io/images/og-card.png">
-<meta property="og:url" content="https://nadiequierepensar.github.io/">
-<meta property="og:type" content="website">
-
-<!-- Twitter (también lo toma WhatsApp a veces) -->
-<meta name="twitter:card" content="summary_large_image">
-
+  <!-- Codificación base -->
   <meta charset="utf-8" />
+
+  <!-- Viewport para móviles + notch -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Nadie quiere pensar — Splash</title>
+
+  <!-- Color de la barra del navegador (Android/desktop) -->
   <meta name="theme-color" content="#000000" />
+
+  <!-- PWA (iOS): permitir pantalla completa y status bar translúcida -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Manifest PWA -->
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <!-- Íconos del sitio / PWA -->
+  <link rel="icon" sizes="any" href="images/logo-cuadrado-512.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="./images/logo-cuadrado-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="./images/logo-cuadrado-512.png">
+
+  <!-- Metadatos sociales (Open Graph / WhatsApp / Twitter) -->
+  <meta property="og:title" content="Nadie quiere pensar — Calculadora para ensayos, juntadas y canchitas">
+  <meta property="og:description" content="Sacá la cuenta por persona en 3 minutos.">
+  <meta property="og:image" content="https://nadiequierepensar.github.io/images/og-card.png">
+  <meta property="og:url" content="https://nadiequierepensar.github.io/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Título y hoja de estilos -->
+  <title>Nadie quiere pensar — Splash</title>
   <link rel="stylesheet" href="css/app.css?v=4">
 </head>
 <body>
+  <!-- Contenido principal: pantalla de splash -->
   <main class="splash">
     <div class="splash-box">
-      <img class="logo" src="images/logoaplicacion.png" alt="Logo de Nadie quiere pensar" />
+      <img class="logo" src="images/logoaplicacion.png" alt="Logo de Nadie quiere pensar">
       <div class="brand-splash">CharlyCorp®</div>
-      <noscript><p style="margin-top:12px"><a href="menu.html">Entrar</a></p></noscript>
+      <!-- Fallback sin JS: enlace directo al menú -->
+      <noscript>
+        <p style="margin-top:12px"><a href="menu.html">Entrar</a></p>
+      </noscript>
     </div>
   </main>
 
-  <!-- al final de index.html -->
-<script src="js/nav-transitions.js?v=2"></script>
-<script>
-  // A los 3s: si hay fade, úsalo; si no, redirigí normal
-  setTimeout(function () {
-    if (window.startPageLeave) {
-      startPageLeave('menu.html', true);
-    } else {
-      window.location.replace('menu.html');
-    }
-  }, 3000);
-</script>
-
+  <!-- Scripts: transiciones y redirección temporizada al menú -->
+  <script src="js/nav-transitions.js?v=2"></script>
+  <script>
+    // A los 3s: si existe la función de fade, usarla; si no, redirigir normal
+    setTimeout(function () {
+      if (window.startPageLeave) {
+        startPageLeave('menu.html', true);
+      } else {
+        window.location.replace('menu.html');
+      }
+    }, 3000);
+  </script>
 </body>
 </html>

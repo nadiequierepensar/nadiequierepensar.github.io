@@ -1,6 +1,11 @@
 <!doctype html>
 <html lang="es">
 <head>
+<!-- Favicon – Juntada -->
+<link rel="icon" type="image/png" href="../images/juntada.png" sizes="any">
+<link rel="shortcut icon" href="../images/juntada.png">
+<link rel="apple-touch-icon" href="../images/juntada.png">
+
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
@@ -57,7 +62,7 @@
       function saveAndGo(){
         const val = parseInt(sel.value, 10);
         if (!Number.isFinite(val) || val < 1 || val > 10) {
-          alert('Elegí la cantidad de personas (1 a 10).');
+          alert('No elegiste nada pancho');
           sel.focus();
           return;
         }

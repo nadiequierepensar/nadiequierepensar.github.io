@@ -9,6 +9,10 @@
   --primary:#ff0202;     /* acción destacada (CharlyCorp / botones) */
   --radius:16px;
   --gap:18px;
+
+  /* Ancho UNIFICADO para pantallas de resultado */
+  --result-max: 720px;      /* <- ajustá este valor si querés más/menos ancho */
+  --result-side-pad: 20px;  /* padding horizontal del wrapper */
 }
 
 * { box-sizing:border-box; }
@@ -40,9 +44,9 @@ h1 {
   border:0; border-radius:16px;
   background:var(--surface); color:var(--text); cursor:pointer;
   display:grid; place-items:center;
-  overflow:hidden;                        /* recorta imagen si se pasa */
+  overflow:hidden;
   transition:transform .08s ease-in-out;
-  text-decoration:none;                   /* si es <a> */
+  text-decoration:none;
 }
 .row-btn img { width:100%; height:100%; object-fit:contain; display:block; }
 .row-btn:active { transform:scale(.98); }
@@ -106,9 +110,11 @@ html.is-leaving main { opacity:0; }
 /* =========================================================
    Ensayo – Tema morado (pasos 1 y 2)
    ========================================================= */
-.page-ensayo1 { background:#2c2a89; }              /* del XML */
+.page-ensayo1 { background:#2c2a89; }
 .page-ensayo1 main { min-height:100dvh; }
-.page-ensayo1 .ensayo-wrap { max-width:560px; margin:0 auto; padding:24px 20px 88px; }
+.page-ensayo1 .ensayo-wrap {
+  max-width:560px; margin:0 auto; padding:24px 20px 88px;
+}
 .page-ensayo1 .ensayo-title {
   color:#fff; font-weight:900; font-size:2rem; line-height:1.2; margin:24px 0 12px;
 }
@@ -218,9 +224,7 @@ html.is-leaving main { opacity:0; }
   appearance:none; -webkit-appearance:none; -moz-appearance:none;
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ffffff'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:right 12px center;
-  background-size:16px;
+  background-repeat:no-repeat; background-position:right 12px center; background-size:16px;
 }
 .page-ensayo1 .ensayo-select:focus,
 .page-juntadas1 .ensayo-select:focus {
@@ -260,9 +264,7 @@ html.is-leaving main { opacity:0; }
 .page-canchita .canchita-actions { display:flex; justify-content:flex-end; margin-top:16px; }
 .page-canchita .btn { padding:12px 16px; border:0; border-radius:12px; cursor:pointer; }
 .page-canchita .btn-primary {
-  background:var(--primary); /* rojo global */
-  color:#fff;
-  font-weight:700;
+  background:var(--primary); color:#fff; font-weight:700;
 }
 
 /* select (spinner) */
@@ -284,16 +286,40 @@ html.is-leaving main { opacity:0; }
 /* =========================================================
    Resultados – componentes comunes (Ensayo / Juntadas / Canchita)
    ========================================================= */
-.result-wrap{ display:grid; gap:18px; }
+
+/* 1) Unificar ancho de los WRAPPERS en resultados */
+.page-ensayo1 .final-wrap,
+.page-juntadas1 .final-wrap,
+.page-canchita .final-wrap {
+  max-width: var(--result-max) !important;
+  margin: 0 auto !important;
+  padding-left: var(--result-side-pad) !important;
+  padding-right: var(--result-side-pad) !important;
+}
+
+/* Si en tus HTML usás .ensayo-wrap / .canchita-wrap como wrapper del final,
+   también los normalizamos para asegurar mismo ancho. */
+.page-ensayo1 .ensayo-wrap.final-wrap,
+.page-juntadas1 .ensayo-wrap.final-wrap,
+.page-canchita .canchita-wrap.final-wrap{
+  max-width: var(--result-max) !important;
+  margin: 0 auto !important;
+  padding-left: var(--result-side-pad) !important;
+  padding-right: var(--result-side-pad) !important;
+}
+
+/* 2) Estilos de bloques y pastillas */
+.result-wrap{ display:grid; gap:18px; width:100%; }
 .result-title{
   color:#fff; font-weight:900; font-size:2rem; line-height:1.2;
   margin:24px 0 0; text-align:left;
 }
 .result-sub{ color:#fff; font-size:1.1rem; margin-top:8px; }
-.list-results{ display:grid; gap:10px; margin-top:8px; }
+.list-results{ display:grid; gap:10px; margin-top:8px; width:100%; }
 .line{
   display:flex; justify-content:space-between; align-items:center;
   padding:10px 12px; border-radius:12px; background:rgba(0,0,0,.12);
+  width:100%;
 }
 .name{ color:#fff; font-size:1.05rem; }
 .amt{ color:#fff; font-weight:800; }
@@ -310,11 +336,37 @@ html.is-leaving main { opacity:0; }
   display:grid; place-items:center; color:#fff; font-size:22px; font-weight:700;
   box-shadow:0 6px 16px rgba(0,0,0,.35);
 }
-.fab.green{ background:#00C853; }   /* Reiniciar */
-.fab.red{   background:#FF0202; }   /* Compartir */
+.fab.green{ background:#00C853; }
+.fab.red{   background:#FF0202; }
 .fab-label{ color:#fff; font-size:.85rem; opacity:.95; }
 
-/* Responsive ≥480px (alineado a tu patrón) */
+/* Responsive ≥480px */
 @media (min-width:480px){
   .result-title{ font-size:2.2rem; }
+}
+/* ===== Donar / Cafecito ===== */
+.donate-wrap{
+  display:flex;
+  justify-content:center;
+  margin:16px 0 8px;          /* arriba de los dos FABs */
+}
+.donate-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:12px 18px;
+  border-radius:999px;
+  background:#FFD54F;         /* amarillo cafecito */
+  color:#1a1a1a;
+  font-weight:800;
+  text-decoration:none;
+  letter-spacing:.2px;
+  box-shadow:0 6px 16px rgba(0,0,0,.25);
+  transition:transform .06s ease, filter .12s ease;
+}
+.donate-btn:hover{ filter:brightness(1.04); transform:translateY(-1px); }
+.donate-btn:active{ transform:translateY(0); }
+
+@media (max-width:420px){
+  .donate-btn{ padding:11px 16px; }
 }
