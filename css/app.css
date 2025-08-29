@@ -280,3 +280,41 @@ html.is-leaving main { opacity:0; }
   outline:2px solid rgba(255,255,255,.45); outline-offset:2px; border-color:transparent;
 }
 .page-canchita .canchita-select option { background:#2a892e; color:#fff; }
+
+/* =========================================================
+   Resultados – componentes comunes (Ensayo / Juntadas / Canchita)
+   ========================================================= */
+.result-wrap{ display:grid; gap:18px; }
+.result-title{
+  color:#fff; font-weight:900; font-size:2rem; line-height:1.2;
+  margin:24px 0 0; text-align:left;
+}
+.result-sub{ color:#fff; font-size:1.1rem; margin-top:8px; }
+.list-results{ display:grid; gap:10px; margin-top:8px; }
+.line{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 12px; border-radius:12px; background:rgba(0,0,0,.12);
+}
+.name{ color:#fff; font-size:1.05rem; }
+.amt{ color:#fff; font-weight:800; }
+
+/* Bloque inferior de acciones (no fijo) */
+.final-wrap{ padding-bottom:24px; }
+.actions-bottom{
+  display:flex; justify-content:center; gap:36px;
+  margin:24px auto 8px;
+}
+.fab-stack{ display:grid; gap:6px; justify-items:center; }
+.fab{
+  width:64px; height:64px; border-radius:999px; border:0; cursor:pointer;
+  display:grid; place-items:center; color:#fff; font-size:22px; font-weight:700;
+  box-shadow:0 6px 16px rgba(0,0,0,.35);
+}
+.fab.green{ background:#00C853; }   /* Reiniciar */
+.fab.red{   background:#FF0202; }   /* Compartir */
+.fab-label{ color:#fff; font-size:.85rem; opacity:.95; }
+
+/* Responsive ≥480px (alineado a tu patrón) */
+@media (min-width:480px){
+  .result-title{ font-size:2.2rem; }
+}
