@@ -1,28 +1,40 @@
 <!doctype html>
 <html lang="es">
 <head>
-<!-- Favicon – Ensayo -->
-<link rel="icon" type="image/png" href="../images/ensayo.png" sizes="any">
-<link rel="shortcut icon" href="../images/ensayo.png">
-<link rel="apple-touch-icon" href="../images/ensayo.png">
+  <!-- Favicon – Ensayo -->
+  <link rel="icon" type="image/png" href="../images/ensayo.png" sizes="any">
+  <link rel="shortcut icon" href="../images/ensayo.png">
+  <link rel="apple-touch-icon" href="../images/ensayo.png">
 
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
-<!-- Android / Desktop: color de la barra del navegador -->
-<meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
-
-<!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-
+  <!-- Meta base -->
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <!-- Android / Desktop: color de la barra del navegador -->
+  <meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <title>Ensayo — Paso 3</title>
   <link rel="stylesheet" href="../css/app.css?v=6">
   <style>
-    /* Mostrar cada palabra con inicial en mayúscula mientras se escribe */
-    .name-input{ text-transform: capitalize; }
+    /* Capital inicial mientras se escribe */
+    .name-input { text-transform: capitalize; }
+
+    /* Resaltado de campos duplicados */
+    .dup {
+      outline: 2px solid #ff5a5f;
+      box-shadow: 0 0 0 3px rgba(255,90,95,.15);
+    }
+    .dup-hint {
+      margin-top: 10px;
+      font-size: .95rem;
+      color: #ff5a5f;
+      display: none;
+    }
+    .dup-hint.show { display: block; }
   </style>
 </head>
 <body class="page-ensayo1">
@@ -32,6 +44,11 @@
 
       <form id="form3" class="ensayo-form" novalidate>
         <div id="campos"></div>
+
+        <p id="dupHint" class="dup-hint">
+          💡 <strong>Sugerencia:</strong> se detectaron nombres repetidos.
+          Para no complicarla, agreguen un diferenciador (por ejemplo: “Juan” y “Juancho”).
+        </p>
 
         <div class="ensayo-actions">
           <button id="next" class="btn btn-primary" type="submit" style="display:none">
@@ -45,13 +62,36 @@
   <script src="../js/nav-transitions.js?v=3"></script>
   <script>
   (function(){
-    const KEY = 'ensayo_state';
+    const KEY  = 'ensayo_state';
+    const NEXT = 'ensayo4.html';
 
-    // Función: pone en minúsculas y capitaliza la primera letra de cada palabra
+    // Capitaliza primera letra de cada palabra (soporta unicode)
     function properName(s){
       const lower = (s||'').toLocaleLowerCase('es-AR');
       return lower.replace(/\b([\p{L}\p{M}])([\p{L}\p{M}]*)/gu,
         (_, a, b) => a.toLocaleUpperCase('es-AR') + b);
+    }
+
+    // Normaliza para comparar: trim, minúsculas y sin acentos
+    function norm(s){
+      return (s||'')
+        .trim()
+        .toLocaleLowerCase('es-AR')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    }
+
+    // Detecta duplicados: { dupKeys:Set, counts:Map, pretty:Map }
+    function findDuplicates(values){
+      const counts = new Map();
+      const pretty = new Map();
+      for (const v of values){
+        const k = norm(v);
+        if (!k) continue;
+        counts.set(k, (counts.get(k)||0) + 1);
+        if (!pretty.has(k)) pretty.set(k, properName(v));
+      }
+      const dupKeys = new Set([...counts.entries()].filter(([,c]) => c >= 2).map(([k]) => k));
+      return { dupKeys, counts, pretty };
     }
 
     // Estado (fallback: al menos 1 integrante)
@@ -63,6 +103,7 @@
     const form = document.getElementById('form3');
     const cont = document.getElementById('campos');
     const btn  = document.getElementById('next');
+    const dupHint = document.getElementById('dupHint');
 
     // Crear inputs dinámicos
     const inputs = [];
@@ -74,7 +115,7 @@
       input.type = 'text';
       input.maxLength = 40;
       input.autocomplete = 'off';
-      input.autocapitalize = 'words';          // sugiere teclado con capitalización inicial
+      input.autocapitalize = 'words';
       input.setAttribute('enterkeyhint', i < n - 1 ? 'next' : 'done');
       input.className = 'ensayo-input name-input';
       input.placeholder = `Nombre del integrante ${i+1}`;
@@ -82,9 +123,10 @@
         input.value = properName(s.integrantes[i]);
       }
 
-      // Al salir del campo, normalizar a "Capital Inicial"
+      // Normalizar y re-evaluar duplicados al salir
       input.addEventListener('blur', () => {
         input.value = properName(input.value.trim());
+        checkDupes(false);
       });
 
       // Enter → siguiente (último: submit)
@@ -96,28 +138,72 @@
         }
       });
 
+      // En vivo: habilitar botón y chequear duplicados
+      input.addEventListener('input', () => {
+        toggleNext();
+        checkDupes(false);
+      });
+
       wrap.appendChild(input);
       cont.appendChild(wrap);
       inputs.push(input);
     }
 
-    // Mostrar botón solo cuando todos tienen texto
+    // Mostrar botón sólo cuando todos tienen texto
     function toggleNext() {
       const ok = inputs.every(el => el.value.trim().length > 0);
       btn.style.display = ok ? 'inline-block' : 'none';
     }
-    inputs.forEach(el => el.addEventListener('input', toggleNext));
     toggleNext();
 
-    // Submit → guardar (formato Capital Inicial) y avanzar
+    // Marca/desmarca duplicados y muestra hint (no bloqueante)
+    function checkDupes(showHint){
+      const vals = inputs.map(el => el.value);
+      const { dupKeys } = findDuplicates(vals);
+      let any = false;
+      inputs.forEach(el => {
+        const isDup = dupKeys.has(norm(el.value));
+        el.classList.toggle('dup', isDup);
+        any = any || isDup;
+      });
+      dupHint.classList.toggle('show', !!(showHint && any));
+      if (!showHint) dupHint.classList.remove('show');
+      return any;
+    }
+
+    // Submit → validar duplicados, confirmar y guardar
     form.addEventListener('submit', (ev) => {
       ev.preventDefault();
+
       const nombres = inputs.map(el => properName(el.value.trim()));
       if (nombres.some(v => !v)) { toggleNext(); return; }
 
+      const { dupKeys, counts, pretty } = findDuplicates(nombres);
+      if (dupKeys.size > 0) {
+        inputs.forEach(el => el.classList.toggle('dup', dupKeys.has(norm(el.value))));
+
+        const detalles = [...dupKeys]
+          .map(k => `${pretty.get(k)} (${counts.get(k)})`)
+          .join(', ');
+        const msg =
+          "Sugerencia 💡: se detectaron 2 o más nombres repetidos (" + detalles + ").\n\n" +
+          "Para no complicarla, les sugiero agregar un diferenciador, por ejemplo “Juan” y “Juancho”.\n\n" +
+          "¿Querés continuar de todos modos?";
+        dupHint.classList.add('show');
+
+        const seguir = window.confirm(msg);
+        if (!seguir) {
+          const primeroDup = inputs.find(el => dupKeys.has(norm(el.value)));
+          if (primeroDup) primeroDup.focus();
+          return;
+        }
+      } else {
+        dupHint.classList.remove('show');
+      }
+
       sessionStorage.setItem(KEY, JSON.stringify({ ...s, integrantes: nombres }));
-      if (window.startPageLeave) startPageLeave('ensayo4.html');
-      else location.href = 'ensayo4.html';
+      if (window.startPageLeave) startPageLeave(NEXT);
+      else location.href = NEXT;
     });
   })();
   </script>

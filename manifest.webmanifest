@@ -1,7 +1,7 @@
 {
   "name": "Nadie quiere pensar",
   "short_name": "NQP",
-  "start_url": "./menu.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#000000",

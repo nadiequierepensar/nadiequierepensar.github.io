@@ -1,17 +1,17 @@
 <!doctype html>
 <html lang="es">
 <head>
-<!-- Favicon – Canchita -->
-<link rel="icon" type="image/png" href="../images/canchita.png" sizes="any">
-<link rel="shortcut icon" href="../images/canchita.png">
-<link rel="apple-touch-icon" href="../images/canchita.png">
+  <!-- Favicon – Canchita -->
+  <link rel="icon" type="image/png" href="../images/canchita.png" sizes="any">
+  <link rel="shortcut icon" href="../images/canchita.png">
+  <link rel="apple-touch-icon" href="../images/canchita.png">
 
   <!-- Meta base -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <!-- Android / Desktop: color de la barra del navegador (Canchita) -->
-  <meta name="theme-color" content="#2a892e"> <!-- poné #000000 en páginas negras como menu.html -->
+  <meta name="theme-color" content="#2a892e">
 
   <!-- iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,9 +24,19 @@
   <style>
     /* Inicial mayúscula mientras se escribe */
     .name-input { text-transform: capitalize; }
-    /* (opcional) esconder labels visibles sólo para accesibilidad
-    .visually-hidden{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;}
-    */
+
+    /* Resaltado de campos duplicados */
+    .dup {
+      outline: 2px solid #ff5a5f;
+      box-shadow: 0 0 0 3px rgba(255,90,95,.15);
+    }
+    .dup-hint {
+      margin-top: 10px;
+      font-size: .95rem;
+      color: #ff5a5f;
+      display: none;
+    }
+    .dup-hint.show { display: block; }
   </style>
 </head>
 <body class="page-canchita">
@@ -36,6 +46,11 @@
 
       <form id="form2" class="canchita-form" novalidate>
         <div id="campos"></div>
+
+        <p id="dupHint" class="dup-hint">
+          💡 <strong>Sugerencia:</strong> se detectaron nombres repetidos.
+          Para no complicarla, agreguen un diferenciador (por ejemplo: “Juan” y “Juancho”).
+        </p>
 
         <div class="canchita-actions">
           <button id="next" class="btn btn-primary" type="submit" style="display:none">
@@ -59,6 +74,28 @@
         (_, a, b) => a.toLocaleUpperCase('es-AR') + b);
     }
 
+    // Normaliza para comparar: trim, minúsculas, sin acentos
+    function norm(s){
+      return (s||'')
+        .trim()
+        .toLocaleLowerCase('es-AR')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // quita tildes
+    }
+
+    // Detecta duplicados: devuelve { dupKeys:Set, counts:Map, pretty:Map }
+    function findDuplicates(values){
+      const counts = new Map();
+      const pretty = new Map();
+      for (const v of values){
+        const k = norm(v);
+        if (!k) continue;
+        counts.set(k, (counts.get(k)||0) + 1);
+        if (!pretty.has(k)) pretty.set(k, properName(v));
+      }
+      const dupKeys = new Set([...counts.entries()].filter(([,c]) => c >= 2).map(([k]) => k));
+      return { dupKeys, counts, pretty };
+    }
+
     // Estado (fallback: al menos 1 jugador)
     let st = {};
     try { st = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
@@ -68,6 +105,7 @@
     const form = document.getElementById('form2');
     const cont = document.getElementById('campos');
     const btn  = document.getElementById('next');
+    const dupHint = document.getElementById('dupHint');
 
     // Crear inputs dinámicos
     const inputs = [];
@@ -88,9 +126,10 @@
         input.value = properName(st.jugadores[i]);
       }
 
-      // Normalizar a "Capital Inicial" al salir
+      // Normalizar a "Capital Inicial" al salir y re-evaluar duplicados
       input.addEventListener('blur', () => {
         input.value = properName(input.value.trim());
+        checkDupes(false);
       });
 
       // Enter → siguiente (último: submit)
@@ -100,6 +139,12 @@
           if (i < n - 1) inputs[i+1].focus();
           else form.requestSubmit();
         }
+      });
+
+      // En vivo: evaluar duplicados y botón
+      input.addEventListener('input', () => {
+        toggleNext();
+        checkDupes(false);
       });
 
       wrap.appendChild(input);
@@ -112,15 +157,60 @@
       const ok = inputs.every(el => el.value.trim().length > 0);
       btn.style.display = ok ? 'inline-block' : 'none';
     }
-    inputs.forEach(el => el.addEventListener('input', toggleNext));
     toggleNext();
 
-    // Submit → guardar nombres (capitalizados) y avanzar
+    // Marca/desmarca duplicados y muestra hint (no bloqueante)
+    function checkDupes(showHint){
+      const vals = inputs.map(el => el.value);
+      const { dupKeys } = findDuplicates(vals);
+      let any = false;
+      inputs.forEach(el => {
+        const isDup = dupKeys.has(norm(el.value));
+        el.classList.toggle('dup', isDup);
+        any = any || isDup;
+      });
+      dupHint.classList.toggle('show', !!(showHint && any));
+      if (!showHint) dupHint.classList.remove('show');
+      return any;
+    }
+
+    // Submit → validar duplicados, confirmar y guardar
     form.addEventListener('submit', (ev) => {
       ev.preventDefault();
+
+      // Nombres en formato lindo para guardar
       const nombres = inputs.map(el => properName(el.value.trim()));
       if (nombres.some(v => !v)) { toggleNext(); return; }
 
+      // Duplicados
+      const { dupKeys, counts, pretty } = findDuplicates(nombres);
+      if (dupKeys.size > 0) {
+        // Resalta duplicados
+        inputs.forEach(el => el.classList.toggle('dup', dupKeys.has(norm(el.value))));
+
+        // Mensaje amigable
+        const detalles = [...dupKeys]
+          .map(k => `${pretty.get(k)} (${counts.get(k)})`)
+          .join(', ');
+        const msg =
+          "Sugerencia 💡: se detectaron 2 o más nombres repetidos (" + detalles + ").\n\n" +
+          "Para no complicarla, les sugiero agregar un diferenciador, por ejemplo “Juan” y “Juancho”.\n\n" +
+          "¿Querés continuar de todos modos?";
+
+        dupHint.classList.add('show');
+
+        // Confirmar o volver a corregir
+        const seguir = window.confirm(msg);
+        if (!seguir) {
+          const primeroDup = inputs.find(el => dupKeys.has(norm(el.value)));
+          if (primeroDup) primeroDup.focus();
+          return;
+        }
+      } else {
+        dupHint.classList.remove('show');
+      }
+
+      // Guardar y avanzar
       sessionStorage.setItem(KEY, JSON.stringify({ ...st, jugadores: nombres }));
       if (window.startPageLeave) startPageLeave(NEXT);
       else location.href = NEXT;
