@@ -352,6 +352,8 @@ html.is-leaving main { opacity:0; }
 }
 .donate-btn{
   display:inline-flex;
+  flex-wrap:wrap;             /* permite que el emoji baje de línea */
+  justify-content:center;     /* centra cada línea del contenido */
   align-items:center;
   gap:8px;
   padding:12px 18px;
@@ -364,9 +366,15 @@ html.is-leaving main { opacity:0; }
   box-shadow:0 6px 16px rgba(0,0,0,.25);
   transition:transform .06s ease, filter .12s ease;
 }
+.donate-btn .label{ white-space:normal; } /* por si venía con nowrap */
+.donate-btn .emoji{ line-height:1; }      /* evita salto raro vertical */
+
 .donate-btn:hover{ filter:brightness(1.04); transform:translateY(-1px); }
 .donate-btn:active{ transform:translateY(0); }
 
 @media (max-width:420px){
   .donate-btn{ padding:11px 16px; }
+  /* Si corta en dos líneas, asegura el ☕ centrado ocupando la línea completa */
+  .donate-btn .emoji{ flex-basis:100%; text-align:center; }
 }
+
