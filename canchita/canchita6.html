@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <!-- Meta base -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <!-- Android / Desktop: color de la barra del navegador -->
+  <meta name="theme-color" content="#2a892e"> <!-- poné #000000 en páginas negras como menu.html -->
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Título y estilos -->
+  <title>Canchita — Paso 6</title>
+  <link rel="stylesheet" href="../css/app.css?v=6" />
+
+  <style>
+    /* Estilos locales: lista de switches */
+    .switch-list{ display:grid; gap:12px; margin-top:14px; }
+    .switch-row{
+      display:grid; grid-template-columns:1fr auto; align-items:center;
+      padding:12px 8px; border-bottom:1px solid rgba(255,255,255,.12);
+    }
+    .switch-name{ color:#fff; font-size:1.05rem; }
+    .switch{ position:relative; width:52px; height:30px; }
+    .switch input{
+      position:absolute; inset:0; width:100%; height:100%;
+      opacity:0; margin:0; cursor:pointer;
+    }
+    .switch .slider{
+      position:absolute; inset:0; background:rgba(255,255,255,.25);
+      border-radius:999px; transition:background .18s ease, box-shadow .18s ease;
+    }
+    .switch .slider::after{
+      content:""; position:absolute; top:3px; left:3px;
+      width:24px; height:24px; border-radius:50%; background:#fff;
+      transition:transform .18s ease;
+    }
+    .switch input:checked + .slider{
+      background:#4CAF50;
+      box-shadow:0 0 0 3px rgba(76,175,80,.2) inset;
+    }
+    .switch input:checked + .slider::after{ transform:translateX(22px); }
+  </style>
+</head>
+<body class="page-canchita">
+  <main>
+    <div class="canchita-wrap">
+      <h1 class="canchita-title">¿Quiénes alquilaron equipamiento?</h1>
+
+      <form id="form6" class="canchita-form" novalidate>
+        <div id="lista" class="switch-list" aria-live="polite"></div>
+
+        <div class="canchita-actions">
+          <button class="btn btn-primary" type="submit">Siguiente →</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Scripts: transiciones y lógica -->
+  <script src="../js/nav-transitions.js?v=3"></script>
+  <script>
+    (function(){
+      const KEY = 'canchita_state_v1';
+      const NEXT = 'canchita7.html';
+      const BACK_TO_NAMES = 'canchita2.html';
+
+      function getState(){ try { return JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch { return {}; } }
+      function setState(s){ sessionStorage.setItem(KEY, JSON.stringify(s)); }
+
+      const s = getState();
+
+      // Si en C4 dijeron que NO hubo equipamiento, saltar a C7
+      if (s.equipamiento && s.equipamiento.hubo === false) {
+        if (window.startPageLeave) startPageLeave(NEXT, true); else location.href = NEXT;
+        return;
+      }
+
+      // Nombres de jugadores; si faltan, generar placeholders; si no hay nada, volver a C2
+      let nombres = Array.isArray(s.jugadores) ? s.jugadores.slice() : [];
+      if (!nombres.length && Number.isFinite(+s.cantidad) && +s.cantidad > 0) {
+        const n = +s.cantidad;
+        nombres = Array.from({length:n}, (_,i)=>`Jugador ${i+1}`);
+      }
+      if (!nombres.length) {
+        if (window.startPageLeave) startPageLeave(BACK_TO_NAMES, true); else location.href = BACK_TO_NAMES;
+        return;
+      }
+
+      // Render de switches
+      const cont = document.getElementById('lista');
+      const inputs = [];
+      nombres.forEach((name, idx) => {
+        const row = document.createElement('div');
+        row.className = 'switch-row';
+
+        const label = document.createElement('div');
+        label.className = 'switch-name';
+        label.textContent = name;
+
+        const sw = document.createElement('label');
+        sw.className = 'switch';
+        sw.innerHTML = '<input type="checkbox" aria-label="Paga equipamiento"><span class="slider"></span>';
+
+        row.appendChild(label);
+        row.appendChild(sw);
+        cont.appendChild(row);
+
+        inputs.push(sw.querySelector('input'));
+      });
+
+      // Preseleccionar según estado previo
+      if (s.equipamiento && Array.isArray(s.equipamiento.jugadores)) {
+        s.equipamiento.jugadores.forEach(i => { if (inputs[i]) inputs[i].checked = true; });
+      } else if (s.equipamiento && s.equipamiento.imputadoA === 'todos') {
+        inputs.forEach(inp => inp.checked = true);
+      }
+
+      // Submit → validar selección, setear imputadoA y guardar
+      document.getElementById('form6').addEventListener('submit', (ev) => {
+        ev.preventDefault();
+
+        const idxs = [];
+        inputs.forEach((inp, i) => { if (inp.checked) idxs.push(i); });
+
+        if (!idxs.length) {
+          alert('Marcá al menos un jugador para imputar el equipamiento.');
+          return;
+        }
+
+        const imputadoA =
+          idxs.length === nombres.length ? 'todos' :
+          idxs.length === 1 ? 'uno' : 'algunos';
+
+        const nextState = {
+          ...s,
+          equipamiento: {
+            ...(s.equipamiento || { hubo:true, precio:0 }),
+            hubo: true,
+            jugadores: idxs,
+            imputadoA
+          }
+        };
+        setState(nextState);
+
+        if (window.startPageLeave) startPageLeave(NEXT, true);
+        else location.href = NEXT;
+      });
+    })();
+  </script>
+</body>
+</html>

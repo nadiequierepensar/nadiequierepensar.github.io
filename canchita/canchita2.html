@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <!-- Meta base -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <!-- Android / Desktop: color de la barra del navegador (Canchita) -->
+  <meta name="theme-color" content="#2a892e"> <!-- poné #000000 en páginas negras como menu.html -->
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Título y estilos -->
+  <title>Canchita — Paso 2</title>
+  <link rel="stylesheet" href="../css/app.css?v=6">
+
+  <style>
+    /* Inicial mayúscula mientras se escribe */
+    .name-input { text-transform: capitalize; }
+    /* (opcional) esconder labels visibles sólo para accesibilidad
+    .visually-hidden{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;}
+    */
+  </style>
+</head>
+<body class="page-canchita">
+  <main>
+    <div class="canchita-wrap">
+      <h1 class="canchita-title">¿Cómo se llaman los jugadores?</h1>
+
+      <form id="form2" class="canchita-form" novalidate>
+        <div id="campos"></div>
+
+        <div class="canchita-actions">
+          <button id="next" class="btn btn-primary" type="submit" style="display:none">
+            Siguiente →
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="../js/nav-transitions.js?v=3"></script>
+  <script>
+  (function(){
+    const KEY  = 'canchita_state_v1';
+    const NEXT = 'canchita3.html';
+
+    // Capitaliza primera letra de cada palabra (con soporte unicode)
+    function properName(s){
+      const lower = (s||'').toLocaleLowerCase('es-AR');
+      return lower.replace(/\b([\p{L}\p{M}])([\p{L}\p{M}]*)/gu,
+        (_, a, b) => a.toLocaleUpperCase('es-AR') + b);
+    }
+
+    // Estado (fallback: al menos 1 jugador)
+    let st = {};
+    try { st = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+    const n = Math.max(1, Number(st.cantidad || 1));
+
+    // Refs
+    const form = document.getElementById('form2');
+    const cont = document.getElementById('campos');
+    const btn  = document.getElementById('next');
+
+    // Crear inputs dinámicos
+    const inputs = [];
+    for (let i = 0; i < n; i++) {
+      const wrap = document.createElement('div');
+      wrap.style.marginTop = i === 0 ? '0' : '12px';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.maxLength = 40;
+      input.autocomplete = 'name';
+      input.autocapitalize = 'words';
+      input.setAttribute('enterkeyhint', i < n - 1 ? 'next' : 'done');
+      input.className = 'canchita-input name-input';
+      input.placeholder = `Nombre del jugador ${i+1}`;
+
+      if (Array.isArray(st.jugadores) && st.jugadores[i]) {
+        input.value = properName(st.jugadores[i]);
+      }
+
+      // Normalizar a "Capital Inicial" al salir
+      input.addEventListener('blur', () => {
+        input.value = properName(input.value.trim());
+      });
+
+      // Enter → siguiente (último: submit)
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (i < n - 1) inputs[i+1].focus();
+          else form.requestSubmit();
+        }
+      });
+
+      wrap.appendChild(input);
+      cont.appendChild(wrap);
+      inputs.push(input);
+    }
+
+    // Mostrar botón sólo cuando todos tienen texto
+    function toggleNext() {
+      const ok = inputs.every(el => el.value.trim().length > 0);
+      btn.style.display = ok ? 'inline-block' : 'none';
+    }
+    inputs.forEach(el => el.addEventListener('input', toggleNext));
+    toggleNext();
+
+    // Submit → guardar nombres (capitalizados) y avanzar
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const nombres = inputs.map(el => properName(el.value.trim()));
+      if (nombres.some(v => !v)) { toggleNext(); return; }
+
+      sessionStorage.setItem(KEY, JSON.stringify({ ...st, jugadores: nombres }));
+      if (window.startPageLeave) startPageLeave(NEXT, true);
+      else location.href = NEXT;
+    });
+  })();
+  </script>
+</body>
+</html>

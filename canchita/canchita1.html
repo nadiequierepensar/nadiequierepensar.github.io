@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <!-- Meta base -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <!-- Android / Desktop: color de la barra del navegador (tema Canchita) -->
+  <meta name="theme-color" content="#2a892e"> <!-- poné #000000 en páginas negras como menu.html -->
+
+  <!-- iOS PWA: pantalla completa + status bar translúcida -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Título y estilos -->
+  <title>Canchita — Paso 1</title>
+  <link rel="stylesheet" href="../css/app.css?v=6">
+</head>
+<body class="page-canchita">
+  <main>
+    <!-- Contenedor principal -->
+    <div class="canchita-wrap">
+      <h1 id="saludo" class="canchita-title">¡Hola equipo! ¿Cuántos son?</h1>
+
+      <!-- Formulario: elegir cantidad de jugadores -->
+      <form id="form1" class="canchita-form" novalidate>
+        <!-- Selector estilizado -->
+        <select id="jugadores" class="canchita-select" aria-label="Cantidad de jugadores" required>
+          <option value="" selected disabled>Seleccioná una opción...</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+
+        <!-- Acciones -->
+        <div class="canchita-actions">
+          <button class="btn btn-primary" type="submit">Siguiente →</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Scripts: transiciones y lógica de paso -->
+  <script src="../js/nav-transitions.js?v=3"></script>
+  <script>
+    (function(){
+      const KEY = 'canchita_state_v1';   // clave de estado específica de Canchita
+      const NEXT = 'canchita2.html';     // siguiente paso del flujo
+
+      const form = document.getElementById('form1');
+      const sel  = document.getElementById('jugadores');
+
+      function saveAndGo(){
+        const val = parseInt(sel.value, 10);
+        if (!Number.isFinite(val) || val < 1) {
+          alert('Elegí la cantidad de jugadores');
+          sel.focus();
+          return;
+        }
+
+        // Guardar en sessionStorage y avanzar
+        let state = {};
+        try { state = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+        state.cantidad = val;
+        sessionStorage.setItem(KEY, JSON.stringify(state));
+
+        if (window.startPageLeave) startPageLeave(NEXT, true);
+        else location.href = NEXT;
+      }
+
+      // Avanza al cambiar, o con el botón "Siguiente"
+      sel.addEventListener('change', saveAndGo);
+      form.addEventListener('submit', function(e){ e.preventDefault(); saveAndGo(); });
+    })();
+  </script>
+</body>
+</html>

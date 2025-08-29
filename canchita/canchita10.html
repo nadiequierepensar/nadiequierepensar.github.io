@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <!-- Meta base -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <!-- Android / Desktop: color de la barra del navegador -->
+  <meta name="theme-color" content="#2a892e">
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Título y estilos -->
+  <title>Canchita — Paso 10</title>
+  <link rel="stylesheet" href="../css/app.css?v=6">
+  <style>
+    /* Resumen */
+    .result-wrap{ display:grid; gap:18px; }
+    .result-title{ color:#fff; font-weight:900; font-size:2rem; line-height:1.2; margin-top:24px; text-align:left; }
+    .result-sub{ color:#fff; font-size:1.1rem; margin-top:8px; }
+    .list-results{ display:grid; gap:10px; margin-top:4px; }
+    .line{ display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:12px; background:rgba(0,0,0,.12); }
+    .name{ color:#fff; font-size:1.05rem; }
+    .amt{ color:#fff; font-weight:800; }
+
+    /* Ya no necesitamos espacio extra para botones fijos */
+    .final-wrap{ padding-bottom: 24px; }
+
+    /* Botones al final del contenido (no fijos) */
+    .actions-bottom{
+      display:flex; justify-content:center; gap:36px;
+      margin:24px auto 8px;
+    }
+    .fab-stack{ display:grid; gap:6px; justify-items:center; }
+    .fab{
+      width:64px; height:64px; border-radius:999px; border:0; cursor:pointer;
+      display:grid; place-items:center; color:#fff; font-size:22px; font-weight:700;
+      box-shadow:0 6px 16px rgba(0,0,0,.35);
+    }
+    .fab.green{ background:#00C853; }  /* Reiniciar */
+    .fab.red{   background:#FF0202; }  /* Compartir */
+    .fab-label{ color:#fff; font-size:.85rem; opacity:.95; }
+  </style>
+</head>
+<body class="page-canchita">
+  <main>
+    <div class="canchita-wrap final-wrap">
+      <div class="result-wrap">
+        <h1 id="tit" class="result-title">Resultado del partido</h1>
+        <div id="sub" class="result-sub">Cada uno:</div>
+        <div id="lista" class="list-results"></div>
+      </div>
+
+      <!-- Botones al final del contenido -->
+      <div class="actions-bottom">
+        <div class="fab-stack">
+          <button id="reiniciar" class="fab green" title="Reiniciar">↺</button>
+          <div class="fab-label">Reiniciar</div>
+        </div>
+        <div class="fab-stack">
+          <button id="compartir" class="fab red" title="Compartir">⤴</button>
+          <div class="fab-label">Compartir</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts: transiciones y lógica -->
+  <script src="../js/nav-transitions.js?v=3"></script>
+  <script>
+    (function(){
+      const KEY='canchita_state_v1';
+      const BACK_TO_NAMES = 'canchita2.html';
+
+      // Leer estado
+      let s = {};
+      try { s = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+
+      // Nombres de jugadores (o placeholders). Si no hay, volver a C2
+      const nombres = Array.isArray(s.jugadores) && s.jugadores.length
+        ? s.jugadores
+        : (Number.isFinite(+s.cantidad) && +s.cantidad > 0
+            ? Array.from({length:+s.cantidad}, (_,i)=>`Jugador ${i+1}`)
+            : []);
+      if (!nombres.length){
+        if (window.startPageLeave) startPageLeave(BACK_TO_NAMES, true);
+        else location.href = BACK_TO_NAMES;
+        return;
+      }
+      const cant = nombres.length;
+
+      // Valores base
+      const precioCanchita = Number.isFinite(+s.precio_canchita) ? +s.precio_canchita : 0;
+
+      // Equipamiento
+      const equip = s.equipamiento || {};
+      const huboEquip   = equip.hubo === true && Number.isFinite(+equip.precio) && +equip.precio > 0;
+      const equipPrecio = huboEquip ? +equip.precio : 0;
+      const equipIdx    = Array.isArray(equip.jugadores) ? equip.jugadores.map(Number).filter(Number.isInteger) : [];
+      const equipCount  = huboEquip ? (equipIdx.length || 0) : 0;
+
+      // 3° tiempo
+      const tt = s.tercer_tiempo || {};
+      const huboTT   = tt.hubo === true && Number.isFinite(+tt.precio) && +tt.precio > 0;
+      const ttPrecio = huboTT ? +tt.precio : 0;
+      const ttIdx    = Array.isArray(tt.jugadores) ? tt.jugadores.map(Number).filter(Number.isInteger) : [];
+      const ttCount  = huboTT ? (ttIdx.length || 0) : 0;
+
+      // Helpers
+      const money = (n) => '$' + (n|0).toLocaleString('es-AR');
+
+      // Cálculos (enteros truncados)
+      const perCanchita = Math.trunc(precioCanchita / Math.max(1, cant));
+      const perEquip    = huboEquip && equipCount > 0 ? Math.trunc(equipPrecio / equipCount) : 0;
+      const perTT       = huboTT   && ttCount    > 0 ? Math.trunc(ttPrecio / ttCount)       : 0;
+
+      const totalGeneral = (precioCanchita|0) + (equipPrecio|0) + (ttPrecio|0);
+
+      // Título y subtítulo
+      document.getElementById('tit').textContent = 'Resultado del partido';
+      document.getElementById('sub').textContent = `Total: ${money(totalGeneral)}  •  Cada uno:`;
+
+      // Render de la lista por persona
+      const ul = document.getElementById('lista');
+      nombres.forEach((name, idx) => {
+        const pagaEquip = huboEquip && equipIdx.includes(idx);
+        const pagaTT    = huboTT   && ttIdx.includes(idx);
+        const total = perCanchita + (pagaEquip ? perEquip : 0) + (pagaTT ? perTT : 0);
+
+        const row = document.createElement('div'); row.className = 'line';
+        const nEl = document.createElement('div'); nEl.className = 'name'; nEl.textContent = name;
+        const aEl = document.createElement('div'); aEl.className = 'amt';  aEl.textContent = money(total);
+        row.appendChild(nEl); row.appendChild(aEl);
+        ul.appendChild(row);
+      });
+
+      // Reiniciar → limpia estado y vuelve al menú
+      document.getElementById('reiniciar').addEventListener('click', () => {
+        sessionStorage.removeItem(KEY);
+        if (window.startPageLeave) startPageLeave('../menu.html', true);
+        else location.replace('../menu.html');
+      });
+
+      // Compartir → Web Share si existe, sino copia al portapapeles
+      document.getElementById('compartir').addEventListener('click', async () => {
+        const lines = [];
+        lines.push('Partido');
+        lines.push(`Canchita: ${money(precioCanchita)}  |  Equipamiento: ${money(equipPrecio)}  |  3° tiempo: ${money(ttPrecio)}`);
+        lines.push(`Total: ${money(totalGeneral)}`);
+        lines.push('');
+        lines.push('Cada uno:');
+        nombres.forEach((name, idx) => {
+          const pagaEquip = huboEquip && equipIdx.includes(idx);
+          const pagaTT    = huboTT   && ttIdx.includes(idx);
+          const total = perCanchita + (pagaEquip ? perEquip : 0) + (pagaTT ? perTT : 0);
+          const tags = [pagaEquip ? 'equipamiento' : '', pagaTT ? '3° tiempo' : ''].filter(Boolean).join(' + ');
+          lines.push(`- ${name}: ${money(total)}${tags ? ` (${tags})` : ''}`);
+        });
+        const text = lines.join('\n');
+
+        try{
+          if (navigator.share) {
+            await navigator.share({ title: 'Canchita — Resultado', text });
+          } else if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            alert('Resumen copiado al portapapeles.');
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = text; document.body.appendChild(ta);
+            ta.select(); document.execCommand('copy'); ta.remove();
+            alert('Resumen copiado al portapapeles.');
+          }
+        }catch(e){
+          console.error(e);
+          alert('No se pudo compartir/copiar el resumen.');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

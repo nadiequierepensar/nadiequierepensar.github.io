@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <!-- Meta base -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <!-- Android / Desktop: color de la barra del navegador -->
+  <meta name="theme-color" content="#2a892e"> <!-- poné #000000 en páginas negras como menu.html -->
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Título y estilos -->
+  <title>Canchita — Paso 7</title>
+  <link rel="stylesheet" href="../css/app.css?v=6">
+  <style>
+    /* Estilos locales para esta pantalla (dos botones apilados) */
+    .stack { display: grid; gap: 12px; margin-top: 16px; }
+    .btn { padding:12px 16px; border:0; border-radius:12px; cursor:pointer; font-weight:700; color:#fff; }
+    .btn-yes { background:#4CAF50; } /* Sí */
+    .btn-no  { background:#E91E63; } /* No */
+  </style>
+</head>
+<body class="page-canchita">
+  <main>
+    <!-- Contenedor principal -->
+    <div class="canchita-wrap">
+      <h1 class="canchita-title">¿Hubo 3° tiempo?</h1>
+
+      <!-- Opciones: Sí → Paso 8 / No → salta al Paso 10 -->
+      <div class="stack">
+        <button id="si" class="btn btn-yes" type="button">Sí, hubo 3° tiempo 🍻</button>
+        <button id="no" class="btn btn-no"  type="button">No, no hubo 3° tiempo 🤓</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts: transiciones y lógica -->
+  <script src="../js/nav-transitions.js?v=3"></script>
+  <script>
+    (function(){
+      // Estado del flujo y rutas siguientes
+      const KEY = 'canchita_state_v1';
+      const NEXT_SI = 'canchita8.html';   // valor del 3° tiempo
+      const NEXT_NO = 'canchita10.html';  // resultado final
+
+      function getState(){
+        try { return JSON.parse(sessionStorage.getItem(KEY) || '{}'); }
+        catch { return {}; }
+      }
+      function setState(s){ sessionStorage.setItem(KEY, JSON.stringify(s)); }
+
+      // "Sí" → marcar hubo=true y continuar
+      document.getElementById('si').addEventListener('click', () => {
+        const s = getState();
+        s.tercer_tiempo = { ...(s.tercer_tiempo || {}), hubo: true };
+        setState(s);
+        if (window.startPageLeave) startPageLeave(NEXT_SI, true);
+        else location.href = NEXT_SI;
+      });
+
+      // "No" → dejar en falso, limpiar valores y saltar al resultado
+      document.getElementById('no').addEventListener('click', () => {
+        const s = getState();
+        s.tercer_tiempo = { hubo: false, precio: 0, imputadoA: 'todos', jugadores: [] };
+        setState(s);
+        if (window.startPageLeave) startPageLeave(NEXT_NO, true);
+        else location.href = NEXT_NO;
+      });
+    })();
+  </script>
+</body>
+</html>
