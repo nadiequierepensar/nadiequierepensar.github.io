@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- Android / Desktop: color de la barra del navegador -->
+<meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
+
+<!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ensayo — Paso 5</title>
+  <link rel="stylesheet" href="../css/app.css?v=6">
+  <style>
+    /* Estilos locales para los dos botones de esta pantalla */
+    .btn-green{ background:#4CAF50; color:#fff; font-weight:700; }
+    .btn-pink{  background:#E91E63; color:#fff; font-weight:700; }
+    .stack{ display:grid; gap:12px; margin-top:16px; }
+  </style>
+</head>
+<body class="page-ensayo1">
+  <main>
+    <div class="ensayo-wrap">
+      <h1 class="ensayo-title">¿Tomaron alcohol?</h1>
+
+      <div class="stack">
+        <button id="si" class="btn btn-green">Tomamos alcohol 😎</button>
+        <button id="no" class="btn btn-pink">No tomamos alcohol 🤓</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/nav-transitions.js?v=3"></script>
+  <script>
+    (function(){
+      const KEY = 'ensayo_state';
+      function getState(){ try { return JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch { return {}; } }
+      function setState(s){ sessionStorage.setItem(KEY, JSON.stringify(s)); }
+
+      // Botón "Sí": pasar a Paso 6 (selección de tomadores y monto de alcohol)
+      document.getElementById('si').addEventListener('click', function(){
+        const s = getState();
+        s.alcoholTomado = true;
+        setState(s);
+        if (window.startPageLeave) startPageLeave('ensayo6.html');
+        else location.href = 'ensayo6.html';
+      });
+
+      // Botón "No": pasar directo al Paso 8 (resumen sin alcohol)
+      document.getElementById('no').addEventListener('click', function(){
+        const s = getState();
+        s.alcoholTomado = false;
+        s.valorAlcohol = 0;
+        setState(s);
+        if (window.startPageLeave) startPageLeave('ensayo8.html');
+        else location.href = 'ensayo8.html';
+      });
+    })();
+  </script>
+</body>
+</html>

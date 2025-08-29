@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- Android / Desktop: color de la barra del navegador -->
+<meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
+
+<!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ensayo — Paso 4</title>
+  <link rel="stylesheet" href="../css/app.css?v=6">
+  <style>
+    /* Estilos locales de esta pantalla (tema morado) */
+    .money { display:flex; align-items:center; gap:8px; margin-top:12px; }
+    .peso  { color:#fff; font-size:1.5rem; padding-right:8px; line-height:1; }
+    .money-input {
+      height:50px; /* como en tu XML */
+      /* hereda .ensayo-input: borde, colores, etc. */
+    }
+  </style>
+</head>
+<body class="page-ensayo1">
+  <main>
+    <div class="ensayo-wrap">
+      <h1 class="ensayo-title">¿Cuánto salió la sala?</h1>
+
+      <form id="form4" class="ensayo-form" novalidate>
+        <div class="money">
+          <span class="peso">$</span>
+          <input id="monto"
+                 class="ensayo-input money-input"
+                 type="text"
+                 inputmode="numeric"
+                 pattern="[0-9]*"
+                 maxlength="6"
+                 placeholder="Ingrese el monto"
+                 autocomplete="off"
+                 enterkeyhint="done"
+                 autofocus />
+        </div>
+
+        <div class="ensayo-actions">
+          <button id="next" class="btn btn-primary" type="submit" style="display:none">
+            Siguiente →
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="../js/nav-transitions.js?v=3"></script>
+  <script>
+    (function(){
+      const KEY   = 'ensayo_state';
+      const form  = document.getElementById('form4');
+      const input = document.getElementById('monto');
+      const next  = document.getElementById('next');
+
+      // Prefill si ya había valor guardado
+      try {
+        const s = JSON.parse(sessionStorage.getItem(KEY) || '{}');
+        if (Number.isFinite(s.valorSala)) input.value = String(s.valorSala);
+      } catch {}
+
+      // Normaliza a solo dígitos, límite 6, y muestra/oculta botón
+      function sanitize(){
+        const digits = (input.value || '').replace(/\D+/g, '').slice(0, 6);
+        if (digits !== input.value) input.value = digits;
+        toggleNext();
+      }
+
+      function isValid(){
+        const n = Number(input.value);
+        return Number.isFinite(n) && n >= 1 && n <= 999999;
+      }
+
+      function toggleNext(){
+        next.style.display = isValid() ? 'inline-block' : 'none';
+      }
+
+      input.addEventListener('input', sanitize);
+      // Enter en teclado → submit
+      input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); form.requestSubmit(); }});
+      sanitize(); // estado inicial
+
+      form.addEventListener('submit', (ev)=>{
+        ev.preventDefault();
+        if (!isValid()){ input.focus(); return; }
+        const n = Number(input.value);
+
+        // Guardar como entero (como tu KT: valorSala)
+        let s={}; try{ s = JSON.parse(sessionStorage.getItem(KEY) || '{}'); }catch{}
+        s.valorSala = n;
+        sessionStorage.setItem(KEY, JSON.stringify(s));
+
+        if (window.startPageLeave) startPageLeave('ensayo5.html');
+        else location.href = 'ensayo5.html';
+      });
+    })();
+  </script>
+</body>
+</html>

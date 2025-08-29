@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <!-- Android / Desktop: color de la barra del navegador -->
+  <meta name="theme-color" content="#7414b2">
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>Juntadas — Paso 3</title>
+  <link rel="stylesheet" href="../css/app.css?v=6">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="192x192" href="../images/logo-cuadrado-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="../images/logo-cuadrado-512.png">
+
+  <style>
+    /* Estilos locales de esta pantalla (tema violeta) */
+    .money-row { display:flex; align-items:center; gap:12px; margin-top:12px; }
+    .person-name { flex: 0 0 auto; color:#fff; min-width: 110px; font-weight:700; }
+    .money { display:flex; align-items:center; gap:8px; flex: 1 1 auto; }
+    .peso  { color:#fff; font-size:1.5rem; padding-right:4px; line-height:1; }
+    .money-input {
+      height:50px; /* como en tu XML */
+      /* hereda .ensayo-input: borde, colores, etc. */
+    }
+    /* Que no se rompa en pantallas angostas */
+    @media (max-width: 380px){
+      .person-name { min-width: 90px; font-weight:600; }
+    }
+  </style>
+</head>
+
+<!-- Usamos la misma clase de tema que ya tenés para Juntadas -->
+<body class="page-juntadas1">
+  <main>
+    <div class="ensayo-wrap">
+      <h1 class="ensayo-title">¿Cuánto gastó cada uno?</h1>
+
+      <form id="formJ3" class="ensayo-form" novalidate>
+        <div id="lista"></div>
+
+        <div class="ensayo-actions">
+          <button id="next" class="btn btn-primary" type="submit" style="display:none">
+            Siguiente →
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="../js/nav-transitions.js?v=3"></script>
+  <script>
+  (function(){
+    const KEY = 'juntada_state';
+    const cont = document.getElementById('lista');
+    const form = document.getElementById('formJ3');
+    const next = document.getElementById('next');
+
+    // Cargar estado
+    let s = {};
+    try { s = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+    const integrantes = Array.isArray(s.integrantes) ? s.integrantes : [];
+    const n = Math.max(1, Number(s.cantidad || integrantes.length || 1));
+
+    // Si no hay nombres, generamos placeholders
+    const nombres = integrantes.length ? integrantes : Array.from({length:n}, (_,i)=>`Persona ${i+1}`);
+
+    // Crear filas (nombre + $ + input)
+    const inputs = [];
+    nombres.forEach((nombre, i) => {
+      const row = document.createElement('div');
+      row.className = 'money-row';
+
+      const label = document.createElement('div');
+      label.className = 'person-name';
+      label.textContent = nombre;
+
+      const money = document.createElement('div');
+      money.className = 'money';
+
+      const peso = document.createElement('span');
+      peso.className  = 'peso';
+      peso.textContent = '$';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.inputMode = 'numeric';
+      input.pattern = '[0-9]*';
+      input.maxLength = 6;                     // 1-999999
+      input.autocomplete = 'off';
+      input.enterKeyHint = (i < nombres.length - 1) ? 'next' : 'done';
+      input.placeholder = '0';
+      input.className = 'ensayo-input money-input';
+      if (Array.isArray(s.gastos) && Number.isFinite(s.gastos[i])) {
+        input.value = String(s.gastos[i]);
+      }
+
+      // Normaliza: solo dígitos, tope 6
+      function sanitize(){
+        const digits = (input.value || '').replace(/\D+/g, '').slice(0, 6);
+        if (digits !== input.value) input.value = digits;
+        toggleNext();
+      }
+
+      // Enter → siguiente (último: submit)
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (i < inputs.length - 1) inputs[i+1].focus();
+          else form.requestSubmit();
+        }
+      });
+
+      input.addEventListener('input', sanitize);
+      sanitize(); // estado inicial
+
+      money.appendChild(peso);
+      money.appendChild(input);
+      row.appendChild(label);
+      row.appendChild(money);
+      cont.appendChild(row);
+      inputs.push(input);
+    });
+
+    function valido(el){
+      const n = Number(el.value);
+      return Number.isFinite(n) && n >= 0 && n <= 999999;
+    }
+
+    function toggleNext(){
+      const okTodos = inputs.every(valido);
+      next.style.display = okTodos ? 'inline-block' : 'none';
+    }
+
+    // Por si había valores precargados
+    toggleNext();
+
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      if (!inputs.every(valido)) {
+        const primero = inputs.find(el => !valido(el));
+        if (primero) primero.focus();
+        return;
+      }
+      const gastos = inputs.map(el => Number(el.value));
+      // Guardar y avanzar
+      const nuevo = { ...s, gastos };
+      sessionStorage.setItem(KEY, JSON.stringify(nuevo));
+
+      if (window.startPageLeave) startPageLeave('juntadas4.html');
+      else location.href = 'juntadas4.html';
+    });
+  })();
+  </script>
+</body>
+</html>

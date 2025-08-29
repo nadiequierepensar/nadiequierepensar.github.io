@@ -1,0 +1,14 @@
+# IDE/Gradle/Android
+.idea/
+*.iml
+.gradle/
+gradle/
+gradlew
+gradlew.bat
+build/
+app/
+WebApp/
+
+# Archivos sueltos que no querés
+menu - copia.html
+DNS CLOUDFLARE NQP.png

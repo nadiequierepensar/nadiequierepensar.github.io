@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <!-- Android / Desktop: color de la barra del navegador -->
+  <meta name="theme-color" content="#7414b2">
+
+  <!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>Juntadas — Paso 1</title>
+  <link rel="stylesheet" href="../css/app.css?v=6">
+
+  <!-- (opcional, si ya lo usás global) -->
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="192x192" href="../images/logo-cuadrado-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="../images/logo-cuadrado-512.png">
+</head>
+<body class="page-juntadas1">
+  <main>
+    <div class="ensayo-wrap">
+      <h1 id="saludo" class="ensayo-title">¿Cuántos se juntaron hoy?</h1>
+
+      <form id="formJ1" class="ensayo-form" novalidate>
+        <!-- Spinner estilizado -->
+        <select id="integrantes" class="ensayo-select" aria-label="Cantidad de personas" required>
+          <option value="" selected disabled>Seleccioná una opción...</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+
+        <div class="ensayo-actions">
+          <button class="btn btn-primary" type="submit">Siguiente →</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="../js/nav-transitions.js?v=3"></script>
+  <script>
+    (function(){
+      const KEY = 'juntada_state';
+      const form = document.getElementById('formJ1');
+      const sel  = document.getElementById('integrantes');
+
+      function saveAndGo(){
+        const val = parseInt(sel.value, 10);
+        if (!Number.isFinite(val) || val < 1 || val > 10) {
+          alert('Elegí la cantidad de personas (1 a 10).');
+          sel.focus();
+          return;
+        }
+        // Guardar en sessionStorage y avanzar
+        let state = {};
+        try { state = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+        state.cantidad = val;
+        sessionStorage.setItem(KEY, JSON.stringify(state));
+
+        if (window.startPageLeave) startPageLeave('juntadas2.html');
+        else location.href = 'juntadas2.html';
+      }
+
+      // Avanza al cambiar, o con el botón "Siguiente"
+      sel.addEventListener('change', saveAndGo);
+      form.addEventListener('submit', function(e){ e.preventDefault(); saveAndGo(); });
+    })();
+  </script>
+</body>
+</html>

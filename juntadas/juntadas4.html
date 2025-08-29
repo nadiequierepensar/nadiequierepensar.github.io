@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <!-- Android / Desktop: color de la barra del navegador -->
+  <meta name="theme-color" content="#7414b2">
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>Juntadas — Paso 4</title>
+  <link rel="stylesheet" href="../css/app.css?v=6">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="192x192" href="../images/logo-cuadrado-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="../images/logo-cuadrado-512.png">
+
+  <style>
+    /* Contenedor compacto y alineado a la IZQUIERDA */
+    .ensayo-wrap{ max-width:560px; margin:0 auto; padding:24px 16px 24px; }
+    .ensayo-title{ margin:8px 0 10px; text-align:center; }
+
+    /* Titulares */
+    .big-total{ font-size:3rem; font-weight:900; margin:6px 0 4px; text-align:center; }
+    .per-head{  font-size:1.2rem; font-weight:800; margin:0 0 12px; text-align:center; }
+
+    /* Listas pegadas y alineadas a la izquierda */
+    .list{
+      margin:8px 0;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:6px;          /* si querés más junto, bajá a 4px */
+      text-align:left;
+    }
+    .list li{ margin:0; }
+
+    /* Títulos intermedios y cierre alineados a la izquierda */
+    .sugerencias-title{ margin:14px 0 8px; font-weight:800; text-align:left; }
+    .final-ok{ margin:10px 0 0; font-weight:900; text-align:left; }
+
+    /* Botones al final, en flujo (NO fijos) */
+    .actions-bottom{
+      margin-top:18px;
+      display:flex; justify-content:center; gap:36px;
+    }
+    .fab-stack{ display:grid; gap:6px; justify-items:center; }
+    .fab{
+      width:64px; height:64px; border-radius:999px; border:0; cursor:pointer;
+      display:grid; place-items:center; color:#fff; font-size:22px; font-weight:700;
+      box-shadow:0 6px 16px rgba(0,0,0,.35);
+    }
+    .fab.green{ background:#00C853; }  /* Reiniciar */
+    .fab.red{   background:#FF0202; }  /* Compartir */
+    .fab-label{ color:#fff; font-size:.85rem; opacity:.95; }
+  </style>
+</head>
+
+<body class="page-juntadas1">
+  <main>
+    <div class="ensayo-wrap">
+      <h1 class="ensayo-title">Resumen</h1>
+
+      <div id="totales">
+        <div id="total" class="big-total">Total: $0</div>
+        <div id="cadauno" class="per-head">Cada uno: $0</div>
+      </div>
+
+      <ul id="balances" class="list"></ul>
+
+      <div class="sugerencias-title">Sugerencias:</div>
+      <ul id="sugerencias" class="list"></ul>
+
+      <div id="fin" class="final-ok"></div>
+
+      <!-- Botones al final, en el flujo -->
+      <div class="actions-bottom">
+        <div class="fab-stack">
+          <button id="reiniciar" class="fab green" title="Reiniciar">↺</button>
+          <div class="fab-label">Reiniciar</div>
+        </div>
+        <div class="fab-stack">
+          <button id="compartir" class="fab red" title="Compartir">⤴</button>
+          <div class="fab-label">Compartir</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/nav-transitions.js?v=3"></script>
+  <script>
+  (function(){
+    const KEY = 'juntada_state';
+    const $ = (sel) => document.querySelector(sel);
+    const dinero = (n) => '$' + String(Math.trunc(n || 0)); // truncar como (int)
+
+    // Estado
+    let s = {};
+    try { s = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+    const nombres = Array.isArray(s.integrantes) ? s.integrantes : [];
+    const gastos  = Array.isArray(s.gastos) ? s.gastos.map(x => Number(x)||0) : [];
+    const n = nombres.length || gastos.length;
+    if (!n) { location.href = 'juntadas1.html'; return; }
+
+    // Total / por cabeza
+    const total = gastos.slice(0, n).reduce((a,b)=> a + (Number(b)||0), 0);
+    const porCabeza = total / n;
+    $('#total').textContent   = 'Total: ' + dinero(total);
+    $('#cadauno').textContent = 'Cada uno: ' + dinero(porCabeza);
+
+    // Balances
+    const balances = [];
+    for (let i=0; i<n; i++){
+      const pagado = Number(gastos[i]||0);
+      const bal = pagado - porCabeza;
+      balances.push({ nombre: nombres[i] || ('Persona '+(i+1)), bal });
+    }
+
+    // Render balances (alineado con la lista)
+    const ulBal = $('#balances');
+    balances.forEach(({nombre, bal}) => {
+      const li = document.createElement('li');
+      if (bal > 0)      li.textContent = `${nombre} tiene a favor ${dinero(bal)}`;
+      else if (bal < 0) li.textContent = `${nombre} debe ${dinero(Math.abs(bal))}`;
+      else              li.textContent = `${nombre} está a mano`;
+      ulBal.appendChild(li);
+    });
+
+    // Sugerencias (greedy, orden como el APK)
+    let acreedores = balances
+      .filter(b => b.bal > 0)
+      .map(b => ({ nombre: b.nombre, monto: Math.trunc(b.bal) }))
+      .sort((a,b)=> b.monto - a.monto);
+    let deudores = balances
+      .filter(b => b.bal < 0)
+      .map(b => ({ nombre: b.nombre, monto: Math.trunc(-b.bal) }))
+      .sort((a,b)=> b.monto - a.monto);
+
+    const movs = [];
+    let i=0,j=0;
+    while (i<deudores.length && j<acreedores.length){
+      const deb = deudores[i], cre = acreedores[j];
+      const xfer = Math.min(deb.monto, cre.monto);
+      if (xfer>0) movs.push(`${deb.nombre} le transfiere ${dinero(xfer)} a ${cre.nombre}`);
+      deb.monto -= xfer; cre.monto -= xfer;
+      if (deb.monto===0) i++; if (cre.monto===0) j++;
+    }
+
+    // Render sugerencias
+    const ulSug = $('#sugerencias');
+    if (movs.length === 0){
+      const li = document.createElement('li'); li.textContent = 'No hay movimientos: ya están a mano.'; ulSug.appendChild(li);
+    } else {
+      movs.forEach(t => { const li = document.createElement('li'); li.textContent = t; ulSug.appendChild(li); });
+    }
+
+    // Cierre
+    $('#fin').textContent = 'Y quedarían todos a mano.';
+
+    // Reiniciar
+    document.getElementById('reiniciar').addEventListener('click', () => {
+      sessionStorage.removeItem(KEY);
+      if (window.startPageLeave) startPageLeave('../menu.html', true);
+      else location.replace('../menu.html');
+    });
+
+    // Compartir
+    document.getElementById('compartir').addEventListener('click', async () => {
+      const lines = [];
+      lines.push(`Total: ${dinero(total)}`);
+      lines.push(`Cada uno: ${dinero(porCabeza)}`);
+      lines.push('');
+      balances.forEach(({nombre, bal}) => {
+        if (bal > 0) lines.push(`${nombre} tiene a favor ${dinero(bal)}`);
+        else if (bal < 0) lines.push(`${nombre} debe ${dinero(Math.abs(bal))}`);
+        else lines.push(`${nombre} está a mano`);
+      });
+      lines.push('');
+      if (movs.length){ lines.push('Sugerencias:'); movs.forEach(m => lines.push(m)); }
+      lines.push('');
+      lines.push('Y quedarían todos a mano.');
+      const text = lines.join('\n');
+
+      try{
+        if (navigator.share) {
+          await navigator.share({ title:'Juntada — Resumen', text });
+        } else if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          alert('Resumen copiado al portapapeles.');
+        } else {
+          const ta=document.createElement('textarea'); ta.value=text;
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+          alert('Resumen copiado al portapapeles.');
+        }
+      }catch(e){
+        console.error(e);
+        alert('No se pudo compartir/copiar el resumen.');
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

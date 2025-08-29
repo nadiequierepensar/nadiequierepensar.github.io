@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- Android / Desktop: color de la barra del navegador -->
+<meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
+
+<!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ensayo — Paso 2</title>
+  <link rel="stylesheet" href="../css/app.css?v=6">
+</head>
+<body class="page-ensayo1">
+  <main>
+    <div class="ensayo-wrap">
+      <h1 id="saludo" class="ensayo-title">¡Hola banda! ¿Cuántos son?</h1>
+
+      <form id="form2" class="ensayo-form" novalidate>
+        <!-- Spinner estilizado -->
+        <select id="integrantes" class="ensayo-select" aria-label="Cantidad de integrantes" required>
+          <option value="" selected disabled>Seleccioná una opción...</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+
+        <div class="ensayo-actions">
+          <button class="btn btn-primary" type="submit">Siguiente →</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="../js/nav-transitions.js?v=3"></script>
+  <script>
+    (function(){
+      const KEY = 'ensayo_state';
+
+      // Saludo con nombre de la banda (del paso 1)
+      let s = {};
+      try { s = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+      const nombre = s.banda || 'banda';
+      const h1 = document.getElementById('saludo');
+      if (h1) h1.textContent = `¡Hola ${nombre}! ¿Cuántos son?`;
+
+      const form = document.getElementById('form2');
+      const sel  = document.getElementById('integrantes');
+
+      function saveAndGo(){
+        const val = parseInt(sel.value, 10);
+        if (!Number.isFinite(val) || val < 1) {
+          alert('Elegí la cantidad de integrantes');
+          sel.focus();
+          return;
+        }
+        // Guardar en sessionStorage y avanzar
+        let state = {};
+        try { state = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+        state.cantidad = val;
+        sessionStorage.setItem(KEY, JSON.stringify(state));
+
+        if (window.startPageLeave) startPageLeave('ensayo3.html');
+        else location.href = 'ensayo3.html';
+      }
+
+      // Avanza al cambiar, o con el botón "Siguiente"
+      sel.addEventListener('change', saveAndGo);
+      form.addEventListener('submit', function(e){ e.preventDefault(); saveAndGo(); });
+    })();
+  </script>
+</body>
+</html>

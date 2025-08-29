@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- Android / Desktop: color de la barra del navegador -->
+<meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
+
+<!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ensayo — Paso 3</title>
+  <link rel="stylesheet" href="../css/app.css?v=6">
+  <style>
+    /* Mostrar cada palabra con inicial en mayúscula mientras se escribe */
+    .name-input{ text-transform: capitalize; }
+  </style>
+</head>
+<body class="page-ensayo1">
+  <main>
+    <div class="ensayo-wrap">
+      <h1 class="ensayo-title">¿Cómo se llaman?</h1>
+
+      <form id="form3" class="ensayo-form" novalidate>
+        <div id="campos"></div>
+
+        <div class="ensayo-actions">
+          <button id="next" class="btn btn-primary" type="submit" style="display:none">
+            Siguiente →
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="../js/nav-transitions.js?v=3"></script>
+  <script>
+  (function(){
+    const KEY = 'ensayo_state';
+
+    // Función: pone en minúsculas y capitaliza la primera letra de cada palabra
+    function properName(s){
+      const lower = (s||'').toLocaleLowerCase('es-AR');
+      return lower.replace(/\b([\p{L}\p{M}])([\p{L}\p{M}]*)/gu,
+        (_, a, b) => a.toLocaleUpperCase('es-AR') + b);
+    }
+
+    // Estado (fallback: al menos 1 integrante)
+    let s = {};
+    try { s = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+    const n = Math.max(1, Number(s.cantidad || 1));
+
+    // Refs
+    const form = document.getElementById('form3');
+    const cont = document.getElementById('campos');
+    const btn  = document.getElementById('next');
+
+    // Crear inputs dinámicos
+    const inputs = [];
+    for (let i = 0; i < n; i++) {
+      const wrap = document.createElement('div');
+      wrap.style.marginTop = i === 0 ? '0' : '12px';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.maxLength = 40;
+      input.autocomplete = 'name';
+      input.autocapitalize = 'words';          // sugiere teclado con capitalización inicial
+      input.setAttribute('enterkeyhint', i < n - 1 ? 'next' : 'done');
+      input.className = 'ensayo-input name-input';
+      input.placeholder = `Nombre del integrante ${i+1}`;
+      if (Array.isArray(s.integrantes) && s.integrantes[i]) {
+        input.value = properName(s.integrantes[i]);
+      }
+
+      // Al salir del campo, normalizar a "Capital Inicial"
+      input.addEventListener('blur', () => {
+        input.value = properName(input.value.trim());
+      });
+
+      // Enter → siguiente (último: submit)
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (i < n - 1) inputs[i+1].focus();
+          else form.requestSubmit();
+        }
+      });
+
+      wrap.appendChild(input);
+      cont.appendChild(wrap);
+      inputs.push(input);
+    }
+
+    // Mostrar botón solo cuando todos tienen texto
+    function toggleNext() {
+      const ok = inputs.every(el => el.value.trim().length > 0);
+      btn.style.display = ok ? 'inline-block' : 'none';
+    }
+    inputs.forEach(el => el.addEventListener('input', toggleNext));
+    toggleNext();
+
+    // Submit → guardar (formato Capital Inicial) y avanzar
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const nombres = inputs.map(el => properName(el.value.trim()));
+      if (nombres.some(v => !v)) { toggleNext(); return; }
+
+      sessionStorage.setItem(KEY, JSON.stringify({ ...s, integrantes: nombres }));
+      if (window.startPageLeave) startPageLeave('ensayo4.html');
+      else location.href = 'ensayo4.html';
+    });
+  })();
+  </script>
+</body>
+</html>

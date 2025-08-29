@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- Android / Desktop: color de la barra del navegador -->
+<meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
+
+<!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ensayo — Paso 1</title>
+  <link rel="stylesheet" href="../css/app.css?v=6">
+</head>
+<body class="page-ensayo1">
+  <main>
+    <div class="ensayo-wrap">
+      <h1 class="ensayo-title">¿Cómo se llama la banda?</h1>
+
+      <form id="form1" class="ensayo-form" novalidate>
+        <input id="banda"
+               class="ensayo-input"
+               type="text"
+               placeholder="Ingrese el nombre de la banda"
+               maxlength="40"
+               autocomplete="organization"
+               enterkeyhint="next"
+               autofocus />
+
+        <div class="char-count"><span id="cc">0</span>/40</div>
+
+        <div class="ensayo-actions">
+          <button class="btn btn-primary" type="submit" id="next">Siguiente →</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="../js/nav-transitions.js?v=1"></script>
+  <script>
+    // contador de caracteres con recorte seguro (soporta emojis)
+    (function(){
+      const MAX = 40;
+      const input = document.getElementById('banda');
+      const cc = document.getElementById('cc');
+      function update(){
+        const chars = [...input.value];
+        if (chars.length > MAX) input.value = chars.slice(0, MAX).join('');
+        cc.textContent = [...input.value].length;
+      }
+      input.addEventListener('input', update);
+      update();
+    })();
+
+    // Guarda en sessionStorage y avanza con Enter o "Siguiente"
+    const KEY='ensayo_state';
+    const form=document.getElementById('form1');
+    const input=document.getElementById('banda');
+
+    form.addEventListener('submit', (ev)=>{
+      ev.preventDefault();
+      const nombre=(input.value||'').trim();
+      if(!nombre){ alert('No escribiste nada pancho'); input.focus(); return; }
+      let s={}; try{ s=JSON.parse(sessionStorage.getItem(KEY)||'{}'); }catch{}
+      sessionStorage.setItem(KEY, JSON.stringify({...s, banda:nombre}));
+      if(window.startPageLeave) startPageLeave('ensayo2.html'); else location.href='ensayo2.html';
+    });
+
+    // Enter en móviles/desktop
+    input.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter'){ e.preventDefault(); form.requestSubmit(); }
+    });
+  </script>
+</body>
+</html>
