@@ -1,6 +1,19 @@
 <!doctype html>
 <html lang="es">
 <head>
+  <!-- ⚡ Pre-paint fix: marcar is-ready/app-installed/standalone antes de cargar CSS -->
+  <script>
+    (function(){
+      var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+                         || window.navigator.standalone === true;
+      if (isStandalone) {
+        // añadir clases ANTES del primer render
+        var de = document.documentElement;
+        de.className += (de.className ? ' ' : '') + 'is-ready app-installed standalone';
+      }
+    })();
+  </script>
+
   <!-- Codificación y viewport -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -11,7 +24,7 @@
   <!-- Manifest PWA -->
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <!-- PWA (iOS): permitir pantalla completa y status bar translúcida -->
+  <!-- PWA (iOS) -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -28,32 +41,15 @@
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
 
+  <!-- Fallback inline para iOS standalone: forzar visibilidad por si algo falla -->
+  <style>
+    html.standalone main { opacity: 1 !important; }
+  </style>
+
   <!-- Título y estilos (preload + hoja) -->
   <title>Nadie quiere pensar</title>
   <link rel="preload" href="css/app.css?v=4" as="style">
   <link rel="stylesheet" href="css/app.css?v=4">
-
-  <!-- 👇 Fix inicial: forzar visibilidad si está instalada -->
-  <style>
-    .app-installed main { opacity:1 !important; }
-  </style>
-  <script>
-    (function(){
-      var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
-                         || window.navigator.standalone === true;
-      var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
-
-      if (isStandalone) {
-        document.documentElement.classList.add('app-installed','is-ready');
-      }
-
-      // OPCIONAL: si no querés que en iOS quede en menu.html, redirigí a index
-      if (isStandalone && isIOS) {
-        var p = (location.pathname || '').toLowerCase();
-        if (p.endsWith('/menu.html')) location.replace('/index.html');
-      }
-    })();
-  </script>
 </head>
 <body>
   <main>
@@ -129,7 +125,7 @@
       document.getElementById('install-wrap').style.display = 'none';
     });
 
-    // iOS: no hay evento. Mostramos un tip para “Agregar a inicio”
+    // iOS: tip para “Agregar a inicio”
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     if (isIOS && !isStandalone && !sessionStorage.getItem('a2hs_tip')) {
@@ -142,7 +138,7 @@
     }
   </script>
 
-  <!-- Reset de estado -->
+  <!-- Reset de estado (atajos + long-press + URL) -->
   <script>
   (function(){
     const EXPLICIT_KEYS = ['canchita_state_v1', 'ensayo_state', 'juntadas_state'];
@@ -163,15 +159,16 @@
       alert('Se reiniciaron los datos temporales de la app.');
     }
 
-    // URL ?reset=1
+    // 1) URL ?reset=1
     if (new URLSearchParams(location.search).has('reset')){
       resetAndNotify();
+      // quitar el parámetro sin recargar
       const url = new URL(location.href);
       url.searchParams.delete('reset');
       history.replaceState({}, '', url.pathname + (url.search ? '?' + url.searchParams.toString() : '') + url.hash);
     }
 
-    // Atajo teclado Ctrl/Cmd+Alt+R
+    // 2) Atajo de teclado: Ctrl/Cmd + Alt + R
     window.addEventListener('keydown', (e) => {
       const isR = (e.key || '').toLowerCase() === 'r';
       if (isR && e.altKey && (e.ctrlKey || e.metaKey)) {
@@ -180,7 +177,7 @@
       }
     });
 
-    // Long-press en botón .cta
+    // 3) Long-press (800ms) sobre el botón CharlyCorp® (.cta)
     (function attachLongPress(){
       const cta = document.querySelector('.cta');
       if (!cta) return;
@@ -192,6 +189,7 @@
       const end = (ev) => {
         clearTimeout(timer);
         if (fired) {
+          // evitar que dispare el onclick original si el reset ya ocurrió
           ev.preventDefault();
           ev.stopPropagation();
         }
@@ -203,6 +201,7 @@
       cta.addEventListener('click', (ev) => { if (fired) { ev.preventDefault(); ev.stopImmediatePropagation(); } }, true);
     })();
 
+    // 4) Consola
     window.resetAppState = resetAndNotify;
   })();
   </script>
