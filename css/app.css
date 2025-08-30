@@ -63,8 +63,6 @@ h1 {
   position:fixed; left:0; right:0; bottom:0; padding:12px 16px 16px;
   background:linear-gradient(180deg, transparent, rgba(0,0,0,.6) 40%, rgba(0,0,0,.9));
   display:grid; place-items:center;
-  /* 👇 safe-area para iPhone con notch */
-  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0));
 }
 .cta {
   background:var(--primary); color:#fff; border:0; border-radius:999px;
@@ -96,13 +94,6 @@ h1 {
 }
 @media (min-width:480px){
   .logo { width:240px; }
-}
-
-/* 👇 NUEVO: evitar “doble logo” cuando la PWA está instalada */
-.app-installed .splash,
-.app-installed .logo,
-.app-installed .brand-splash {
-  display:none !important;
 }
 
 /* =========================================================
@@ -353,7 +344,6 @@ html.is-leaving main { opacity:0; }
 @media (min-width:480px){
   .result-title{ font-size:2.2rem; }
 }
-
 /* ===== Donar / Cafecito ===== */
 .donate-wrap{
   display:flex;
@@ -387,3 +377,4 @@ html.is-leaving main { opacity:0; }
   /* Si corta en dos líneas, asegura el ☕ centrado ocupando la línea completa */
   .donate-btn .emoji{ flex-basis:100%; text-align:center; }
 }
+

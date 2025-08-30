@@ -1,73 +1,70 @@
 <!doctype html>
 <html lang="es">
 <head>
+  <!-- Codificación base -->
   <meta charset="utf-8" />
+
+  <!-- Viewport para móviles + notch -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <!-- Color de la barra del navegador (Android/desktop) -->
   <meta name="theme-color" content="#000000" />
 
-  <!-- iOS PWA -->
+  <!-- PWA (iOS): permitir pantalla completa y status bar translúcida -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+  <!-- Manifest PWA -->
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <!-- Íconos -->
-  <link rel="icon" sizes="any" href="/images/logo-cuadrado-512.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="/images/logo-cuadrado-192.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="/images/logo-cuadrado-512.png">
+  <!-- Íconos del sitio / PWA -->
+  <link rel="icon" sizes="any" href="images/logo-cuadrado-512.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="./images/logo-cuadrado-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="./images/logo-cuadrado-512.png">
 
-  <!-- OG / Twitter -->
-  <meta property="og:title" content="Ensayo - Juntada - Canchita" />
-  <meta property="og:description" content="Sacá la cuenta por persona en un toque." />
-  <meta property="og:image" content="https://nadiequierepensar.com.ar/images/og-card.png" />
-  <meta property="og:url" content="https://nadiequierepensar.com.ar" />
-  <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Ensayo - Juntada - Canchita" />
-  <meta name="twitter:description" content="Sacá la cuenta por persona en un toque." />
-  <meta name="twitter:image" content="https://nadiequierepensar.com.ar/images/og-card.png" />
+<!-- Open Graph -->
+<meta property="og:title" content="Ensayo - Juntada - Canchita" />
+<meta property="og:description" content="Sacá la cuenta por persona en un toque." />
+<meta property="og:image" content="https://nadiequierepensar.com.ar/images/og-card.png" />
+<meta property="og:url" content="https://nadiequierepensar.com.ar" />
+<meta property="og:type" content="website" />
 
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Ensayo - Juntada - Canchita" />
+<meta name="twitter:description" content="Sacá la cuenta por persona en un toque." />
+<meta name="twitter:image" content="https://nadiequierepensar.com.ar/images/og-card.png" />
+
+
+
+  <!-- Título y hoja de estilos -->
   <title>Nadie quiere pensar — Splash</title>
-  <link rel="stylesheet" href="/css/app.css?v=4">
-
-  <!-- Detectar instalada e iOS (clases para evitar doble logo y redirecciones no deseadas) -->
-  <script>
-    (function(){
-      var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
-                         || window.navigator.standalone === true;
-      var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
-      if (isStandalone) document.documentElement.classList.add('app-installed');
-      if (isStandalone && isIOS) {
-        var p = (location.pathname || '').toLowerCase();
-        if (p.endsWith('/menu.html')) location.replace('/index.html');
-      }
-    })();
-  </script>
+  <link rel="stylesheet" href="css/app.css?v=4">
 </head>
 <body>
+  <!-- Contenido principal: pantalla de splash -->
   <main class="splash">
     <div class="splash-box">
-      <img class="logo" src="/images/logoaplicacion.png" alt="Logo de Nadie quiere pensar">
+      <img class="logo" src="images/logoaplicacion.png" alt="Logo de Nadie quiere pensar">
       <div class="brand-splash">CharlyCorp®</div>
-      <noscript><p style="margin-top:12px"><a href="/menu.html">Entrar</a></p></noscript>
+      <!-- Fallback sin JS: enlace directo al menú -->
+      <noscript>
+        <p style="margin-top:12px"><a href="menu.html">Entrar</a></p>
+      </noscript>
     </div>
   </main>
 
-  <script src="/js/nav-transitions.js?v=2"></script>
+  <!-- Scripts: transiciones y redirección temporizada al menú -->
+  <script src="js/nav-transitions.js?v=2"></script>
   <script>
-    (function(){
-      var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
-                         || window.navigator.standalone === true;
-      if (!isStandalone) {
-        setTimeout(function () {
-          if (window.startPageLeave) {
-            startPageLeave('/menu.html', true);
-          } else {
-            window.location.replace('/menu.html');
-          }
-        }, 3000);
+    // A los 3s: si existe la función de fade, usarla; si no, redirigir normal
+    setTimeout(function () {
+      if (window.startPageLeave) {
+        startPageLeave('menu.html', true);
+      } else {
+        window.location.replace('menu.html');
       }
-    })();
+    }, 3000);
   </script>
 </body>
 </html>
