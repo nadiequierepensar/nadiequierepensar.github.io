@@ -126,7 +126,6 @@
      - Consola: window.resetAppState()
      ============================ */
   (function(){
-    // Claves explícitas + patrón por si aparece otra variante (_state o _state_vN)
     const EXPLICIT_KEYS = ['canchita_state_v1', 'ensayo_state', 'juntadas_state'];
 
     function clearStates(){
@@ -148,7 +147,6 @@
     // 1) URL ?reset=1
     if (new URLSearchParams(location.search).has('reset')){
       resetAndNotify();
-      // quitar el parámetro sin recargar
       const url = new URL(location.href);
       url.searchParams.delete('reset');
       history.replaceState({}, '', url.pathname + (url.search ? '?' + url.searchParams.toString() : '') + url.hash);
@@ -163,7 +161,7 @@
       }
     });
 
-    // 3) Long-press (800ms) sobre el botón CharlyCorp® (.cta)
+    // 3) Long-press (800ms) sobre el botón .cta
     (function attachLongPress(){
       const cta = document.querySelector('.cta');
       if (!cta) return;
@@ -175,7 +173,6 @@
       const end = (ev) => {
         clearTimeout(timer);
         if (fired) {
-          // evitar que dispare el onclick original si el reset ya ocurrió
           ev.preventDefault();
           ev.stopPropagation();
         }
@@ -187,7 +184,6 @@
       cta.addEventListener('click', (ev) => { if (fired) { ev.preventDefault(); ev.stopImmediatePropagation(); } }, true);
     })();
 
-    // 4) Consola
     window.resetAppState = resetAndNotify;
   })();
   </script>
