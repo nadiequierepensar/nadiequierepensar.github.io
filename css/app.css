@@ -2,379 +2,206 @@
    Base / Tema
    ========================================================= */
 :root{
-  --bg:#000;             /* fondo general */
-  --text:#fff;           /* texto principal */
-  --muted:#d8d8d8;       /* texto secundario */
-  --surface:#121212;     /* panel / botones neutros */
-  --primary:#ff0202;     /* acción destacada (CharlyCorp / botones) */
-  --radius:16px;
-  --gap:18px;
-
-  /* Ancho UNIFICADO para pantallas de resultado */
-  --result-max: 720px;      /* <- ajustá este valor si querés más/menos ancho */
-  --result-side-pad: 20px;  /* padding horizontal del wrapper */
+  --bg:#000; --text:#fff; --muted:#d8d8d8; --surface:#121212;
+  --primary:#ff0202; --radius:16px; --gap:18px;
+  --result-max:720px; --result-side-pad:20px;
 }
 
-* { box-sizing:border-box; }
-html, body { min-height:100%; background:var(--bg); color:var(--text); }
-body {
-  margin:0;
-  font:16px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-}
-img { max-width:100%; height:auto; }
+*{ box-sizing:border-box; }
+html,body{ min-height:100%; background:var(--bg); color:var(--text); }
+body{ margin:0; font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+img{ max-width:100%; height:auto; }
 
-main { min-height:100%; display:flex; flex-direction:column; }
-.container { width:min(720px, 94vw); margin:0 auto; padding:24px 0 88px; }
+main{ min-height:100%; display:flex; flex-direction:column; }
+.container{ width:min(720px,94vw); margin:0 auto; padding:24px 0 88px; }
 
-h1 {
-  font-size:2rem; font-weight:800; text-align:center; margin:36px 16px 0;
-}
+h1{ font-size:2rem; font-weight:800; text-align:center; margin:36px 16px 0; }
 
 /* =========================================================
    Menú principal
    ========================================================= */
-.list { margin-top:48px; display:flex; flex-direction:column; gap:64px; padding:0 16px; }
+.list{ margin-top:48px; display:flex; flex-direction:column; gap:64px; padding:0 16px; }
 
-.row { display:grid; grid-template-columns:1fr auto; align-items:center; gap:16px; }
-.row-title { font-size:1.35rem; font-weight:600; }
+/* La fila completa ahora es un <a> clickeable */
+.list .row{
+  display:grid; grid-template-columns:1fr auto; align-items:center; gap:16px;
+  text-decoration:none; color:inherit;  /* sin subrayado, hereda color */
+}
+.list .row:active{ transform:scale(.995); }
 
-/* botón con imagen (mobile-first) */
-.row-btn {
+/* Título dentro de la fila */
+.row-title{ font-size:1.35rem; font-weight:600; }
+
+/* Contenedor del ícono (reemplaza al antiguo .row-btn) */
+.row-thumb, .row-btn{
   width:72px; height:72px;
   border:0; border-radius:16px;
-  background:var(--surface); color:var(--text); cursor:pointer;
+  background:var(--surface); color:var(--text);
   display:grid; place-items:center;
   overflow:hidden;
   transition:transform .08s ease-in-out;
-  text-decoration:none;
 }
-.row-btn img { width:100%; height:100%; object-fit:contain; display:block; }
-.row-btn:active { transform:scale(.98); }
+.row-thumb img, .row-btn img{ width:100%; height:100%; object-fit:contain; display:block; }
 
 /* separadores sutiles entre filas */
-.row + .row { position:relative; }
-.row + .row::before {
+.row + .row{ position:relative; }
+.row + .row::before{
   content:""; position:absolute; left:0; right:0; top:-32px; height:1px;
   background:linear-gradient(90deg, transparent, #222, transparent);
 }
 
 /* botón inferior fijo */
-.footer {
+.footer{
   position:fixed; left:0; right:0; bottom:0; padding:12px 16px 16px;
   background:linear-gradient(180deg, transparent, rgba(0,0,0,.6) 40%, rgba(0,0,0,.9));
   display:grid; place-items:center;
 }
-.cta {
+.cta{
   background:var(--primary); color:#fff; border:0; border-radius:999px;
   padding:16px 28px; font-weight:800; font-size:1rem; cursor:pointer;
   letter-spacing:.2px; box-shadow:0 6px 16px rgba(255,2,2,.35);
 }
 
 /* Accesibilidad */
-:focus-visible { outline:2px solid #fff; outline-offset:2px; border-radius:12px; }
+:focus-visible{ outline:2px solid #fff; outline-offset:2px; border-radius:12px; }
 
 /* Responsivo ≥480px */
 @media (min-width:480px){
-  h1 { font-size:2.2rem; }
-  .row-btn { width:100px; height:100px; }
+  h1{ font-size:2.2rem; }
+  .row-thumb, .row-btn{ width:100px; height:100px; }
 }
 
 /* =========================================================
    Splash
    ========================================================= */
-.splash {
-  min-height:100dvh; display:grid; place-items:center;
-  background:var(--bg); color:var(--text); padding:24px;
-}
-.splash-box { display:grid; justify-items:center; gap:12px; }
-.logo {
+.splash{ min-height:100dvh; display:grid; place-items:center; background:var(--bg); color:var(--text); padding:24px; }
+.splash-box{ display:grid; justify-items:center; gap:12px; }
+.logo{
   width:clamp(140px, 42vw, 220px); aspect-ratio:1/1; object-fit:contain;
-  display:block; margin:0 auto; border-radius:12px;
-  filter: drop-shadow(0 6px 24px rgba(0,0,0,.45));
+  display:block; margin:0 auto; border-radius:12px; filter:drop-shadow(0 6px 24px rgba(0,0,0,.45));
 }
-@media (min-width:480px){
-  .logo { width:240px; }
-}
+@media (min-width:480px){ .logo{ width:240px; } }
+
+/* Transiciones (fade) */
+main{ will-change:opacity; }
+html:not(.is-ready) main{ opacity:0; }
+html.is-ready main{ opacity:1; transition:opacity 320ms ease; }
+html.is-leaving main{ opacity:0; }
+@media (prefers-reduced-motion: reduce){ html.is-ready main{ transition:none; } }
 
 /* =========================================================
-   Transiciones de página (fade en el contenido)
+   Ensayo / Juntadas / Canchita (como los tenías)
    ========================================================= */
-main { will-change: opacity; }
-html:not(.is-ready) main { opacity:0; }
-html.is-ready main { opacity:1; transition:opacity 320ms ease; }
-html.is-leaving main { opacity:0; }
-@media (prefers-reduced-motion: reduce){
-  html.is-ready main { transition:none; }
-}
-
-/* =========================================================
-   Ensayo – Tema morado (pasos 1 y 2)
-   ========================================================= */
-.page-ensayo1 { background:#2c2a89; }
-.page-ensayo1 main { min-height:100dvh; }
-.page-ensayo1 .ensayo-wrap {
-  max-width:560px; margin:0 auto; padding:24px 20px 88px;
-}
-.page-ensayo1 .ensayo-title {
-  color:#fff; font-weight:900; font-size:2rem; line-height:1.2; margin:24px 0 12px;
-}
-
-/* formulario */
-.page-ensayo1 .ensayo-form { margin-top:12px; }
-.page-ensayo1 .ensayo-input {
-  width:100%; padding:14px 12px; border-radius:12px;
-  border:1px solid rgba(255,255,255,.18);
-  background:transparent; color:#fff;
-}
-.page-ensayo1 .ensayo-input::placeholder { color:#AAAAAA; }
-
-/* evitar zoom iOS al enfocar */
-.page-ensayo1 .ensayo-input,
-.page-ensayo1 select,
-.page-ensayo1 textarea { font-size:16px; line-height:1.35; }
-
-/* contador de caracteres */
-.page-ensayo1 .char-count {
-  color:#AAAAAA; font-size:.9rem; text-align:right; margin-top:6px;
-}
-
-/* acciones */
-.page-ensayo1 .ensayo-actions {
-  display:flex; justify-content:flex-end; margin-top:16px;
-}
-.page-ensayo1 .btn {
-  padding:12px 16px; border:0; border-radius:12px; cursor:pointer;
-}
-.page-ensayo1 .btn-primary {
-  background:var(--primary); color:#fff; font-weight:700;
-}
-
-/* select (spinner) estilizado */
-.page-ensayo1 .ensayo-select {
-  width:100%; height:48px;
-  padding:0 44px 0 12px; border-radius:12px;
-  border:1px solid rgba(255,255,255,.18);
-  background:transparent; color:#fff;
-  font-size:16px; line-height:48px;
-  appearance:none; -webkit-appearance:none; -moz-appearance:none;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ffffff'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:right 12px center;
-  background-size:16px;
-}
-.page-ensayo1 .ensayo-select:focus {
-  outline:2px solid rgba(255,255,255,.45); outline-offset:2px; border-color:transparent;
-}
-.page-ensayo1 .ensayo-select option { background:#2c2a89; color:#fff; }
-
-/* =========================================================
-   Juntadas – Tema violeta (equivalente a ensayo1)
-   ========================================================= */
-.page-juntadas1 { background:#7414b2; }
-.page-juntadas1 main { min-height:100dvh; }
-.page-juntadas1 .ensayo-wrap { max-width:560px; margin:0 auto; padding:24px 20px 88px; }
-.page-juntadas1 .ensayo-title {
-  color:#fff; font-weight:900; font-size:2rem; line-height:1.2; margin:24px 0 12px;
-}
-
-/* Reutilizar estilos de formulario/inputs/botones del ensayo */
-.page-ensayo1 .ensayo-form,
-.page-juntadas1 .ensayo-form { margin-top:12px; }
-
-.page-ensayo1 .ensayo-input,
-.page-juntadas1 .ensayo-input {
-  width:100%; padding:14px 12px; border-radius:12px;
-  border:1px solid rgba(255,255,255,.18);
-  background:transparent; color:#fff;
-}
-.page-ensayo1 .ensayo-input::placeholder,
-.page-juntadas1 .ensayo-input::placeholder { color:#AAAAAA; }
-
-/* evitar zoom iOS al enfocar */
-.page-ensayo1 .ensayo-input, .page-ensayo1 select, .page-ensayo1 textarea,
-.page-juntadas1 .ensayo-input, .page-juntadas1 select, .page-juntadas1 textarea {
-  font-size:16px; line-height:1.35;
-}
-
-.page-ensayo1 .char-count,
-.page-juntadas1 .char-count {
-  color:#AAAAAA; font-size:.9rem; text-align:right; margin-top:6px;
-}
-
-.page-ensayo1 .ensayo-actions,
-.page-juntadas1 .ensayo-actions {
-  display:flex; justify-content:flex-end; margin-top:16px;
-}
-.page-ensayo1 .btn, .page-juntadas1 .btn {
-  padding:12px 16px; border:0; border-radius:12px; cursor:pointer;
-}
-.page-ensayo1 .btn-primary, .page-juntadas1 .btn-primary {
-  background:var(--primary); color:#fff; font-weight:700;
-}
-
-/* select (spinner) estilizado */
-.page-ensayo1 .ensayo-select,
-.page-juntadas1 .ensayo-select {
-  width:100%; height:48px;
-  padding:0 44px 0 12px; border-radius:12px;
-  border:1px solid rgba(255,255,255,.18);
-  background:transparent; color:#fff;
-  font-size:16px; line-height:48px;
-  appearance:none; -webkit-appearance:none; -moz-appearance:none;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ffffff'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
-  background-repeat:no-repeat; background-position:right 12px center; background-size:16px;
-}
-.page-ensayo1 .ensayo-select:focus,
-.page-juntadas1 .ensayo-select:focus {
-  outline:2px solid rgba(255,255,255,.45); outline-offset:2px; border-color:transparent;
-}
-.page-ensayo1 .ensayo-select option { background:#2c2a89; color:#fff; }
-.page-juntadas1 .ensayo-select option { background:#7414b2; color:#fff; }
-
-/* =========================================================
-   Canchita – Tema verde
-   ========================================================= */
-.page-canchita { background:#2a892e; }
-.page-canchita main { min-height:100dvh; }
-.page-canchita .canchita-wrap {
-  max-width:560px; margin:0 auto; padding:24px 20px 88px;
-}
-.page-canchita .canchita-title {
-  color:#fff; font-weight:900; font-size:2rem; line-height:1.2; margin:24px 0 12px;
-}
-
-/* formulario */
-.page-canchita .canchita-form { margin-top:12px; }
-.page-canchita .canchita-input {
-  width:100%; padding:14px 12px; border-radius:12px;
-  border:1px solid rgba(255,255,255,.18);
-  background:transparent; color:#fff;
-}
-.page-canchita .canchita-input::placeholder { color:#AAAAAA; }
-
-/* evitar zoom iOS */
-.page-canchita .canchita-input,
-.page-canchita select,
-.page-canchita textarea { font-size:16px; line-height:1.35; }
-
-/* contador, acciones, botones */
-.page-canchita .char-count { color:#AAAAAA; font-size:.9rem; text-align:right; margin-top:6px; }
-.page-canchita .canchita-actions { display:flex; justify-content:flex-end; margin-top:16px; }
-.page-canchita .btn { padding:12px 16px; border:0; border-radius:12px; cursor:pointer; }
-.page-canchita .btn-primary {
-  background:var(--primary); color:#fff; font-weight:700;
-}
-
-/* select (spinner) */
-.page-canchita .canchita-select {
-  width:100%; height:48px;
-  padding:0 44px 0 12px; border-radius:12px;
-  border:1px solid rgba(255,255,255,.18);
-  background:transparent; color:#fff;
-  font-size:16px; line-height:48px;
-  appearance:none; -webkit-appearance:none; -moz-appearance:none;
+.page-ensayo1{ background:#2c2a89; }
+.page-ensayo1 main{ min-height:100dvh; }
+.page-ensayo1 .ensayo-wrap{ max-width:560px; margin:0 auto; padding:24px 20px 88px; }
+.page-ensayo1 .ensayo-title{ color:#fff; font-weight:900; font-size:2rem; line-height:1.2; margin:24px 0 12px; }
+.page-ensayo1 .ensayo-form{ margin-top:12px; }
+.page-ensayo1 .ensayo-input{ width:100%; padding:14px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; color:#fff; }
+.page-ensayo1 .ensayo-input::placeholder{ color:#AAAAAA; }
+.page-ensayo1 .ensayo-input, .page-ensayo1 select, .page-ensayo1 textarea{ font-size:16px; line-height:1.35; }
+.page-ensayo1 .char-count{ color:#AAAAAA; font-size:.9rem; text-align:right; margin-top:6px; }
+.page-ensayo1 .ensayo-actions{ display:flex; justify-content:flex-end; margin-top:16px; }
+.page-ensayo1 .btn{ padding:12px 16px; border:0; border-radius:12px; cursor:pointer; }
+.page-ensayo1 .btn-primary{ background:var(--primary); color:#fff; font-weight:700; }
+.page-ensayo1 .ensayo-select{
+  width:100%; height:48px; padding:0 44px 0 12px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.18); background:transparent; color:#fff;
+  font-size:16px; line-height:48px; appearance:none; -webkit-appearance:none; -moz-appearance:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ffffff'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
   background-repeat:no-repeat; background-position:right 12px center; background-size:16px;
 }
-.page-canchita .canchita-select:focus {
-  outline:2px solid rgba(255,255,255,.45); outline-offset:2px; border-color:transparent;
+.page-ensayo1 .ensayo-select:focus{ outline:2px solid rgba(255,255,255,.45); outline-offset:2px; border-color:transparent; }
+.page-ensayo1 .ensayo-select option{ background:#2c2a89; color:#fff; }
+
+/* Juntadas (reutiliza estilos) */
+.page-juntadas1{ background:#7414b2; }
+.page-juntadas1 main{ min-height:100dvh; }
+.page-juntadas1 .ensayo-wrap{ max-width:560px; margin:0 auto; padding:24px 20px 88px; }
+.page-juntadas1 .ensayo-title{ color:#fff; font-weight:900; font-size:2rem; line-height:1.2; margin:24px 0 12px; }
+.page-ensayo1 .ensayo-form, .page-juntadas1 .ensayo-form{ margin-top:12px; }
+.page-ensayo1 .ensayo-input, .page-juntadas1 .ensayo-input{ width:100%; padding:14px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; color:#fff; }
+.page-ensayo1 .ensayo-input::placeholder, .page-juntadas1 .ensayo-input::placeholder{ color:#AAAAAA; }
+.page-ensayo1 .ensayo-input, .page-ensayo1 select, .page-ensayo1 textarea,
+.page-juntadas1 .ensayo-input, .page-juntadas1 select, .page-juntadas1 textarea{ font-size:16px; line-height:1.35; }
+.page-ensayo1 .char-count, .page-juntadas1 .char-count{ color:#AAAAAA; font-size:.9rem; text-align:right; margin-top:6px; }
+.page-ensayo1 .ensayo-actions, .page-juntadas1 .ensayo-actions{ display:flex; justify-content:flex-end; margin-top:16px; }
+.page-ensayo1 .btn, .page-juntadas1 .btn{ padding:12px 16px; border:0; border-radius:12px; cursor:pointer; }
+.page-ensayo1 .btn-primary, .page-juntadas1 .btn-primary{ background:var(--primary); color:#fff; font-weight:700; }
+.page-ensayo1 .ensayo-select, .page-juntadas1 .ensayo-select{
+  width:100%; height:48px; padding:0 44px 0 12px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.18); background:transparent; color:#fff;
+  font-size:16px; line-height:48px; appearance:none; -webkit-appearance:none; -moz-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ffffff'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 12px center; background-size:16px;
 }
-.page-canchita .canchita-select option { background:#2a892e; color:#fff; }
+.page-ensayo1 .ensayo-select:focus, .page-juntadas1 .ensayo-select:focus{ outline:2px solid rgba(255,255,255,.45); outline-offset:2px; border-color:transparent; }
+.page-ensayo1 .ensayo-select option{ background:#2c2a89; color:#fff; }
+.page-juntadas1 .ensayo-select option{ background:#7414b2; color:#fff; }
 
-/* =========================================================
-   Resultados – componentes comunes (Ensayo / Juntadas / Canchita)
-   ========================================================= */
-
-/* 1) Unificar ancho de los WRAPPERS en resultados */
-.page-ensayo1 .final-wrap,
-.page-juntadas1 .final-wrap,
-.page-canchita .final-wrap {
-  max-width: var(--result-max) !important;
-  margin: 0 auto !important;
-  padding-left: var(--result-side-pad) !important;
-  padding-right: var(--result-side-pad) !important;
+/* Canchita */
+.page-canchita{ background:#2a892e; }
+.page-canchita main{ min-height:100dvh; }
+.page-canchita .canchita-wrap{ max-width:560px; margin:0 auto; padding:24px 20px 88px; }
+.page-canchita .canchita-title{ color:#fff; font-weight:900; font-size:2rem; line-height:1.2; margin:24px 0 12px; }
+.page-canchita .canchita-form{ margin-top:12px; }
+.page-canchita .canchita-input{ width:100%; padding:14px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; color:#fff; }
+.page-canchita .canchita-input::placeholder{ color:#AAAAAA; }
+.page-canchita .canchita-input, .page-canchita select, .page-canchita textarea{ font-size:16px; line-height:1.35; }
+.page-canchita .char-count{ color:#AAAAAA; font-size:.9rem; text-align:right; margin-top:6px; }
+.page-canchita .canchita-actions{ display:flex; justify-content:flex-end; margin-top:16px; }
+.page-canchita .btn{ padding:12px 16px; border:0; border-radius:12px; cursor:pointer; }
+.page-canchita .btn-primary{ background:var(--primary); color:#fff; font-weight:700; }
+.page-canchita .canchita-select{
+  width:100%; height:48px; padding:0 44px 0 12px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.18); background:transparent; color:#fff;
+  font-size:16px; line-height:48px; appearance:none; -webkit-appearance:none; -moz-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ffffff'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 12px center; background-size:16px;
 }
+.page-canchita .canchita-select:focus{ outline:2px solid rgba(255,255,255,.45); outline-offset:2px; border-color:transparent; }
+.page-canchita .canchita-select option{ background:#2a892e; color:#fff; }
 
-/* Si en tus HTML usás .ensayo-wrap / .canchita-wrap como wrapper del final,
-   también los normalizamos para asegurar mismo ancho. */
+/* Resultados – comunes */
+.page-ensayo1 .final-wrap, .page-juntadas1 .final-wrap, .page-canchita .final-wrap{
+  max-width:var(--result-max)!important; margin:0 auto!important;
+  padding-left:var(--result-side-pad)!important; padding-right:var(--result-side-pad)!important;
+}
 .page-ensayo1 .ensayo-wrap.final-wrap,
 .page-juntadas1 .ensayo-wrap.final-wrap,
 .page-canchita .canchita-wrap.final-wrap{
-  max-width: var(--result-max) !important;
-  margin: 0 auto !important;
-  padding-left: var(--result-side-pad) !important;
-  padding-right: var(--result-side-pad) !important;
+  max-width:var(--result-max)!important; margin:0 auto!important;
+  padding-left:var(--result-side-pad)!important; padding-right:var(--result-side-pad)!important;
 }
-
-/* 2) Estilos de bloques y pastillas */
 .result-wrap{ display:grid; gap:18px; width:100%; }
-.result-title{
-  color:#fff; font-weight:900; font-size:2rem; line-height:1.2;
-  margin:24px 0 0; text-align:left;
-}
+.result-title{ color:#fff; font-weight:900; font-size:2rem; line-height:1.2; margin:24px 0 0; text-align:left; }
 .result-sub{ color:#fff; font-size:1.1rem; margin-top:8px; }
 .list-results{ display:grid; gap:10px; margin-top:8px; width:100%; }
-.line{
-  display:flex; justify-content:space-between; align-items:center;
-  padding:10px 12px; border-radius:12px; background:rgba(0,0,0,.12);
-  width:100%;
-}
+.line{ display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:12px; background:rgba(0,0,0,.12); width:100%; }
 .name{ color:#fff; font-size:1.05rem; }
 .amt{ color:#fff; font-weight:800; }
-
-/* Bloque inferior de acciones (no fijo) */
 .final-wrap{ padding-bottom:24px; }
-.actions-bottom{
-  display:flex; justify-content:center; gap:36px;
-  margin:24px auto 8px;
-}
+.actions-bottom{ display:flex; justify-content:center; gap:36px; margin:24px auto 8px; }
 .fab-stack{ display:grid; gap:6px; justify-items:center; }
-.fab{
-  width:64px; height:64px; border-radius:999px; border:0; cursor:pointer;
-  display:grid; place-items:center; color:#fff; font-size:22px; font-weight:700;
-  box-shadow:0 6px 16px rgba(0,0,0,.35);
-}
-.fab.green{ background:#00C853; }
-.fab.red{   background:#FF0202; }
+.fab{ width:64px; height:64px; border-radius:999px; border:0; cursor:pointer; display:grid; place-items:center; color:#fff; font-size:22px; font-weight:700; box-shadow:0 6px 16px rgba(0,0,0,.35); }
+.fab.green{ background:#00C853; } .fab.red{ background:#FF0202; }
 .fab-label{ color:#fff; font-size:.85rem; opacity:.95; }
 
-/* Responsive ≥480px */
-@media (min-width:480px){
-  .result-title{ font-size:2.2rem; }
-}
-/* ===== Donar / Cafecito ===== */
-.donate-wrap{
-  display:flex;
-  justify-content:center;
-  margin:16px 0 8px;          /* arriba de los dos FABs */
-}
+@media (min-width:480px){ .result-title{ font-size:2.2rem; } }
+
+/* Donar / Cafecito */
+.donate-wrap{ display:flex; justify-content:center; margin:16px 0 8px; }
 .donate-btn{
-  display:inline-flex;
-  flex-wrap:wrap;             /* permite que el emoji baje de línea */
-  justify-content:center;     /* centra cada línea del contenido */
-  align-items:center;
-  gap:8px;
-  padding:12px 18px;
-  border-radius:999px;
-  background:#FFD54F;         /* amarillo cafecito */
-  color:#1a1a1a;
-  font-weight:800;
-  text-decoration:none;
-  letter-spacing:.2px;
-  box-shadow:0 6px 16px rgba(0,0,0,.25);
+  display:inline-flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:8px;
+  padding:12px 18px; border-radius:999px; background:#FFD54F; color:#1a1a1a; font-weight:800;
+  text-decoration:none; letter-spacing:.2px; box-shadow:0 6px 16px rgba(0,0,0,.25);
   transition:transform .06s ease, filter .12s ease;
 }
-.donate-btn .label{ white-space:normal; } /* por si venía con nowrap */
-.donate-btn .emoji{ line-height:1; }      /* evita salto raro vertical */
-
+.donate-btn .label{ white-space:normal; }
+.donate-btn .emoji{ line-height:1; }
 .donate-btn:hover{ filter:brightness(1.04); transform:translateY(-1px); }
 .donate-btn:active{ transform:translateY(0); }
-
 @media (max-width:420px){
   .donate-btn{ padding:11px 16px; }
-  /* Si corta en dos líneas, asegura el ☕ centrado ocupando la línea completa */
   .donate-btn .emoji{ flex-basis:100%; text-align:center; }
 }
-
