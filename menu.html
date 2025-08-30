@@ -28,6 +28,24 @@
   <title>Nadie quiere pensar</title>
   <link rel="preload" href="css/app.css?v=4" as="style">
   <link rel="stylesheet" href="css/app.css?v=4">
+
+  <!-- 👇 Snippet mínimo: detectar app instalada y forzar index en iOS -->
+  <script>
+    (function(){
+      var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+                         || window.navigator.standalone === true;
+      var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+
+      // Clase para poder aplicar estilos cuando está instalada
+      if (isStandalone) { document.documentElement.classList.add('app-installed'); }
+
+      // En iOS instalada, si por alguna razón abre /menu.html → ir a /index.html
+      if (isStandalone && isIOS) {
+        var p = (location.pathname || '').toLowerCase();
+        if (p.endsWith('/menu.html')) location.replace('/index.html');
+      }
+    })();
+  </script>
 </head>
 <body>
   <main>
