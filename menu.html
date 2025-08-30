@@ -11,6 +11,10 @@
   <!-- Manifest PWA -->
   <link rel="manifest" href="/manifest.webmanifest">
 
+  <!-- PWA (iOS): permitir pantalla completa y status bar translúcida -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <!-- Íconos del sitio / PWA -->
   <link rel="icon" href="images/menu.png" sizes="any">
   <link rel="apple-touch-icon" sizes="192x192" href="./images/logo-cuadrado-192.png">
@@ -29,17 +33,21 @@
   <link rel="preload" href="css/app.css?v=4" as="style">
   <link rel="stylesheet" href="css/app.css?v=4">
 
-  <!-- 👇 Snippet mínimo: detectar app instalada y forzar index en iOS -->
+  <!-- 👇 Fix inicial: forzar visibilidad si está instalada -->
+  <style>
+    .app-installed main { opacity:1 !important; }
+  </style>
   <script>
     (function(){
       var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
                          || window.navigator.standalone === true;
       var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
 
-      // Clase para poder aplicar estilos cuando está instalada
-      if (isStandalone) { document.documentElement.classList.add('app-installed'); }
+      if (isStandalone) {
+        document.documentElement.classList.add('app-installed','is-ready');
+      }
 
-      // En iOS instalada, si por alguna razón abre /menu.html → ir a /index.html
+      // OPCIONAL: si no querés que en iOS quede en menu.html, redirigí a index
       if (isStandalone && isIOS) {
         var p = (location.pathname || '').toLowerCase();
         if (p.endsWith('/menu.html')) location.replace('/index.html');
@@ -134,17 +142,9 @@
     }
   </script>
 
-  <!-- Reset de estado (atajos + long-press + URL) -->
+  <!-- Reset de estado -->
   <script>
-  /* ============================
-     Reset de estado (Canchita/Juntadas/Ensayo)
-     - URL: menu.html?reset=1
-     - Teclado: Ctrl/Cmd + Alt + R
-     - Long-press (800ms) sobre el botón .cta (CharlyCorp®)
-     - Consola: window.resetAppState()
-     ============================ */
   (function(){
-    // Claves explícitas + patrón por si aparece otra variante (_state o _state_vN)
     const EXPLICIT_KEYS = ['canchita_state_v1', 'ensayo_state', 'juntadas_state'];
 
     function clearStates(){
@@ -163,16 +163,15 @@
       alert('Se reiniciaron los datos temporales de la app.');
     }
 
-    // 1) URL ?reset=1
+    // URL ?reset=1
     if (new URLSearchParams(location.search).has('reset')){
       resetAndNotify();
-      // quitar el parámetro sin recargar
       const url = new URL(location.href);
       url.searchParams.delete('reset');
       history.replaceState({}, '', url.pathname + (url.search ? '?' + url.searchParams.toString() : '') + url.hash);
     }
 
-    // 2) Atajo de teclado: Ctrl/Cmd + Alt + R
+    // Atajo teclado Ctrl/Cmd+Alt+R
     window.addEventListener('keydown', (e) => {
       const isR = (e.key || '').toLowerCase() === 'r';
       if (isR && e.altKey && (e.ctrlKey || e.metaKey)) {
@@ -181,7 +180,7 @@
       }
     });
 
-    // 3) Long-press (800ms) sobre el botón CharlyCorp® (.cta)
+    // Long-press en botón .cta
     (function attachLongPress(){
       const cta = document.querySelector('.cta');
       if (!cta) return;
@@ -193,7 +192,6 @@
       const end = (ev) => {
         clearTimeout(timer);
         if (fired) {
-          // evitar que dispare el onclick original si el reset ya ocurrió
           ev.preventDefault();
           ev.stopPropagation();
         }
@@ -205,7 +203,6 @@
       cta.addEventListener('click', (ev) => { if (fired) { ev.preventDefault(); ev.stopImmediatePropagation(); } }, true);
     })();
 
-    // 4) Consola
     window.resetAppState = resetAndNotify;
   })();
   </script>
