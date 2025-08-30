@@ -1,39 +1,34 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <!-- ⚡ Pre-paint fix: marcar is-ready/app-installed/standalone antes de cargar CSS -->
+  <!-- ⚡ Pre-paint fix: marcar clases ANTES de cargar CSS (evita pantalla negra en iOS A2HS) -->
   <script>
     (function(){
       var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
                          || window.navigator.standalone === true;
       if (isStandalone) {
-        // añadir clases ANTES del primer render
         var de = document.documentElement;
         de.className += (de.className ? ' ' : '') + 'is-ready app-installed standalone';
       }
     })();
   </script>
 
-  <!-- Codificación y viewport -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-
-  <!-- Color de la barra del navegador (Android/desktop) -->
   <meta name="theme-color" content="#000000" />
 
-  <!-- Manifest PWA -->
   <link rel="manifest" href="/manifest.webmanifest">
 
-  <!-- PWA (iOS) -->
+  <!-- iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- Íconos del sitio / PWA -->
-  <link rel="icon" href="images/menu.png" sizes="any">
-  <link rel="apple-touch-icon" sizes="192x192" href="./images/logo-cuadrado-192.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="./images/logo-cuadrado-512.png">
+  <!-- Íconos -->
+  <link rel="icon" href="/images/menu.png" sizes="any">
+  <link rel="apple-touch-icon" sizes="192x192" href="/images/logo-cuadrado-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="/images/logo-cuadrado-512.png">
 
-  <!-- Metadatos sociales (Open Graph / WhatsApp / Twitter) -->
+  <!-- OG / Twitter -->
   <meta property="og:title" content="Nadie quiere pensar — Calculadora para ensayos, juntadas y canchitas">
   <meta property="og:description" content="Sacá la cuenta por persona en 3 minutos.">
   <meta property="og:image" content="https://nadiequierepensar.github.io/images/og-card.png">
@@ -41,82 +36,66 @@
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
 
-  <!-- Fallback inline para iOS standalone: forzar visibilidad por si algo falla -->
-  <style>
-    html.standalone main { opacity: 1 !important; }
-  </style>
+  <!-- Fallback inline: si está instalada, mostrar main por si el JS de transiciones no corrió aún -->
+  <style>html.standalone main{opacity:1!important}</style>
 
-  <!-- Título y estilos (preload + hoja) -->
   <title>Nadie quiere pensar</title>
-  <link rel="preload" href="css/app.css?v=4" as="style">
-  <link rel="stylesheet" href="css/app.css?v=4">
+  <link rel="preload" href="/css/app.css?v=4" as="style">
+  <link rel="stylesheet" href="/css/app.css?v=4">
 </head>
 <body>
   <main>
-    <!-- Encabezado principal -->
     <div class="container">
       <h1>Nadie quiere pensar</h1>
 
-      <!-- Lista de opciones del menú -->
       <section class="list">
-        <!-- Fila 1: Ensayo -->
         <div class="row">
           <div class="row-title">En el ensayo</div>
-          <a class="row-btn" aria-label="Calcular ensayo" href="ensayo/ensayo1.html">
-            <img src="images/ensayo.png" alt="Ensayo">
+          <a class="row-btn" aria-label="Calcular ensayo" href="/ensayo/ensayo1.html">
+            <img src="/images/ensayo.png" alt="Ensayo">
           </a>
         </div>
 
-        <!-- Fila 2: Juntada -->
         <div class="row">
           <div class="row-title">En la juntada</div>
-          <a class="row-btn" aria-label="Calcular juntada" href="juntadas/juntadas1.html">
-            <img src="images/juntada.png" alt="Juntada">
+          <a class="row-btn" aria-label="Calcular juntada" href="/juntadas/juntadas1.html">
+            <img src="/images/juntada.png" alt="Juntada">
           </a>
         </div>
 
-        <!-- Fila 3: Canchita -->
         <div class="row">
           <div class="row-title">En la canchita</div>
-          <a class="row-btn" aria-label="Calcular canchita" href="canchita/canchita1.html">
-            <img src="images/canchita.png" alt="Canchita">
+          <a class="row-btn" aria-label="Calcular canchita" href="/canchita/canchita1.html">
+            <img src="/images/canchita.png" alt="Canchita">
           </a>
         </div>
       </section>
     </div>
 
-    <!-- Botón inferior con easter egg -->
     <div class="footer">
       <button class="cta" onclick="alert('Como todas las buenas ideas, “Nadie quiere pensar” surge de la venganza, la venganza contra el constante encaje de cuentas/plata por parte de mis amigos: “¿Cuánto es mi parte?”, “¡Yo no tomé alcohol eh!”, “La otra vez yo puse de más y me quedaron debiendo”. Bueno, todo eso se acabó. Tomen, calcúlenlo ustedes ahora, les hice una aplicación para eso.')">CharlyCorp®</button>
     </div>
   </main>
 
-  <!-- Scripts base (transiciones + SW) -->
-  <script src="js/nav-transitions.js?v=1"></script>
+  <script src="/js/nav-transitions.js?v=1"></script>
   <script>
-    // Registrar Service Worker (si el navegador lo soporta)
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js');
     }
   </script>
 
-  <!-- Barra inferior “Instalar app” (oculta por defecto) -->
   <div id="install-wrap" style="position:fixed;left:0;right:0;bottom:84px;display:none;justify-content:center;z-index:9999">
     <button id="btn-install" class="cta">Instalar app</button>
   </div>
 
-  <!-- Lógica de instalación (Android/iOS) -->
   <script>
     let deferredPrompt = null;
-
-    // Android/Chrome: capturar evento y mostrar la barra
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
       document.getElementById('install-wrap').style.display = 'flex';
     });
 
-    // Click en “Instalar”
     document.getElementById('btn-install').addEventListener('click', async () => {
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
@@ -125,7 +104,6 @@
       document.getElementById('install-wrap').style.display = 'none';
     });
 
-    // iOS: tip para “Agregar a inicio”
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     if (isIOS && !isStandalone && !sessionStorage.getItem('a2hs_tip')) {
@@ -138,7 +116,6 @@
     }
   </script>
 
-  <!-- Reset de estado (atajos + long-press + URL) -->
   <script>
   (function(){
     const EXPLICIT_KEYS = ['canchita_state_v1', 'ensayo_state', 'juntadas_state'];
@@ -159,16 +136,13 @@
       alert('Se reiniciaron los datos temporales de la app.');
     }
 
-    // 1) URL ?reset=1
     if (new URLSearchParams(location.search).has('reset')){
       resetAndNotify();
-      // quitar el parámetro sin recargar
       const url = new URL(location.href);
       url.searchParams.delete('reset');
       history.replaceState({}, '', url.pathname + (url.search ? '?' + url.searchParams.toString() : '') + url.hash);
     }
 
-    // 2) Atajo de teclado: Ctrl/Cmd + Alt + R
     window.addEventListener('keydown', (e) => {
       const isR = (e.key || '').toLowerCase() === 'r';
       if (isR && e.altKey && (e.ctrlKey || e.metaKey)) {
@@ -177,22 +151,17 @@
       }
     });
 
-    // 3) Long-press (800ms) sobre el botón CharlyCorp® (.cta)
     (function attachLongPress(){
       const cta = document.querySelector('.cta');
       if (!cta) return;
       let timer = null, fired = false;
-      const start = (ev) => {
+      const start = () => {
         fired = false;
         timer = setTimeout(() => { fired = true; resetAndNotify(); }, 800);
       };
       const end = (ev) => {
         clearTimeout(timer);
-        if (fired) {
-          // evitar que dispare el onclick original si el reset ya ocurrió
-          ev.preventDefault();
-          ev.stopPropagation();
-        }
+        if (fired) { ev.preventDefault(); ev.stopPropagation(); }
       };
       cta.addEventListener('touchstart', start, {passive:true});
       cta.addEventListener('touchend', end);
@@ -201,7 +170,6 @@
       cta.addEventListener('click', (ev) => { if (fired) { ev.preventDefault(); ev.stopImmediatePropagation(); } }, true);
     })();
 
-    // 4) Consola
     window.resetAppState = resetAndNotify;
   })();
   </script>

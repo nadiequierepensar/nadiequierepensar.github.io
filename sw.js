@@ -1,11 +1,9 @@
-// SW mínimo: NO cachea nada. Solo habilita el prompt de instalación.
+// SW mínimo: sin caché y sin intercepción especial
 self.addEventListener('install', (e) => {
-  // activa de inmediato
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
-  // limpia caches viejos por si antes usabas uno
   e.waitUntil((async () => {
     const names = await caches.keys();
     await Promise.all(names.map(n => caches.delete(n)));
@@ -13,4 +11,7 @@ self.addEventListener('activate', (e) => {
   })());
 });
 
-// Sin 'fetch' -> no intercepta ni cachea requests
+// Passthrough explícito (equivale a no manejar fetch)
+self.addEventListener('fetch', (event) => {
+  // No respondWith -> el navegador maneja normalmente
+});
