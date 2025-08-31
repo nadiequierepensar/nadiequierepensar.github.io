@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
   <!-- Android / Desktop: color de la barra del navegador -->
-  <meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
+  <meta name="theme-color" content="#2c2a89">
 
   <!-- iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -65,14 +65,12 @@
     const KEY  = 'ensayo_state';
     const NEXT = 'ensayo4.html';
 
-    // Capitaliza primera letra de cada palabra (soporta unicode)
     function properName(s){
       const lower = (s||'').toLocaleLowerCase('es-AR');
       return lower.replace(/\b([\p{L}\p{M}])([\p{L}\p{M}]*)/gu,
         (_, a, b) => a.toLocaleUpperCase('es-AR') + b);
     }
 
-    // Normaliza para comparar: trim, minúsculas y sin acentos
     function norm(s){
       return (s||'')
         .trim()
@@ -80,7 +78,6 @@
         .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     }
 
-    // Detecta duplicados: { dupKeys:Set, counts:Map, pretty:Map }
     function findDuplicates(values){
       const counts = new Map();
       const pretty = new Map();
@@ -94,18 +91,15 @@
       return { dupKeys, counts, pretty };
     }
 
-    // Estado (fallback: al menos 1 integrante)
     let s = {};
     try { s = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
     const n = Math.max(1, Number(s.cantidad || 1));
 
-    // Refs
     const form = document.getElementById('form3');
     const cont = document.getElementById('campos');
     const btn  = document.getElementById('next');
     const dupHint = document.getElementById('dupHint');
 
-    // Crear inputs dinámicos
     const inputs = [];
     for (let i = 0; i < n; i++) {
       const wrap = document.createElement('div');
@@ -123,13 +117,11 @@
         input.value = properName(s.integrantes[i]);
       }
 
-      // Normalizar y re-evaluar duplicados al salir
       input.addEventListener('blur', () => {
         input.value = properName(input.value.trim());
         checkDupes(false);
       });
 
-      // Enter → siguiente (último: submit)
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -138,7 +130,18 @@
         }
       });
 
-      // En vivo: habilitar botón y chequear duplicados
+      // 🔹 Backspace en campo vacío → ir al anterior (sin borrar)
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && input.value.length === 0 && i > 0) {
+          e.preventDefault();
+          const prev = inputs[i - 1];
+          prev.focus();
+          // coloca cursor al final
+          const end = prev.value.length;
+          try { prev.setSelectionRange(end, end); } catch {}
+        }
+      });
+
       input.addEventListener('input', () => {
         toggleNext();
         checkDupes(false);
@@ -149,14 +152,12 @@
       inputs.push(input);
     }
 
-    // Mostrar botón sólo cuando todos tienen texto
     function toggleNext() {
       const ok = inputs.every(el => el.value.trim().length > 0);
       btn.style.display = ok ? 'inline-block' : 'none';
     }
     toggleNext();
 
-    // Marca/desmarca duplicados y muestra hint (no bloqueante)
     function checkDupes(showHint){
       const vals = inputs.map(el => el.value);
       const { dupKeys } = findDuplicates(vals);
@@ -171,17 +172,14 @@
       return any;
     }
 
-    // Submit → validar duplicados, confirmar y guardar
     form.addEventListener('submit', (ev) => {
       ev.preventDefault();
-
       const nombres = inputs.map(el => properName(el.value.trim()));
       if (nombres.some(v => !v)) { toggleNext(); return; }
 
       const { dupKeys, counts, pretty } = findDuplicates(nombres);
       if (dupKeys.size > 0) {
         inputs.forEach(el => el.classList.toggle('dup', dupKeys.has(norm(el.value))));
-
         const detalles = [...dupKeys]
           .map(k => `${pretty.get(k)} (${counts.get(k)})`)
           .join(', ');
@@ -190,7 +188,6 @@
           "Para no complicarla, les sugiero agregar un diferenciador, por ejemplo “Juan” y “Juancho”.\n\n" +
           "¿Querés continuar de todos modos?";
         dupHint.classList.add('show');
-
         const seguir = window.confirm(msg);
         if (!seguir) {
           const primeroDup = inputs.find(el => dupKeys.has(norm(el.value)));

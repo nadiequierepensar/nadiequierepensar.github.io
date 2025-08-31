@@ -78,7 +78,7 @@
         .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // quita tildes
     }
 
-    // Devuelve { dupKeys:Set, counts:Map, pretty:Array } de duplicados
+    // Devuelve { dupKeys:Set, counts:Map, pretty:Map } de duplicados
     function findDuplicates(values){
       const counts = new Map();
       const pretty = new Map(); // key normalizada -> forma "linda" para mostrar
@@ -133,6 +133,17 @@
           e.preventDefault();
           if (i < n - 1) inputs[i+1].focus();
           else form.requestSubmit();
+        }
+      });
+
+      // ⬅️ Backspace en campo vacío → ir al anterior y dejar el cursor al final (sin borrar)
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && input.value.length === 0 && i > 0) {
+          e.preventDefault();
+          const prev = inputs[i - 1];
+          prev.focus();
+          const end = prev.value.length;
+          try { prev.setSelectionRange(end, end); } catch {}
         }
       });
 

@@ -1,19 +1,19 @@
 <!doctype html>
 <html lang="es">
 <head>
-<!-- Favicon – Ensayo -->
-<link rel="icon" type="image/png" href="../images/ensayo.png" sizes="any">
-<link rel="shortcut icon" href="../images/ensayo.png">
-<link rel="apple-touch-icon" href="../images/ensayo.png">
+  <!-- Favicon – Ensayo -->
+  <link rel="icon" type="image/png" href="../images/ensayo.png" sizes="any">
+  <link rel="shortcut icon" href="../images/ensayo.png">
+  <link rel="apple-touch-icon" href="../images/ensayo.png">
 
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-<!-- Android / Desktop: color de la barra del navegador -->
-<meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
+  <!-- Android / Desktop: color de la barra del navegador -->
+  <meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
 
-<!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -35,10 +35,9 @@
                enterkeyhint="next"
                autofocus />
 
-        <div class="char-count"><span id="cc">0</span>/40</div>
-
         <div class="ensayo-actions">
-          <button class="btn btn-primary" type="submit" id="next">Siguiente →</button>
+          <!-- Arranca oculto sin tocar estilos -->
+          <button class="btn btn-primary" type="submit" id="next" hidden>Siguiente →</button>
         </div>
       </form>
     </div>
@@ -46,37 +45,33 @@
 
   <script src="../js/nav-transitions.js?v=1"></script>
   <script>
-    // contador de caracteres con recorte seguro (soporta emojis)
-    (function(){
-      const MAX = 40;
-      const input = document.getElementById('banda');
-      const cc = document.getElementById('cc');
-      function update(){
-        const chars = [...input.value];
-        if (chars.length > MAX) input.value = chars.slice(0, MAX).join('');
-        cc.textContent = [...input.value].length;
-      }
-      input.addEventListener('input', update);
-      update();
-    })();
-
     // Guarda en sessionStorage y avanza con Enter o "Siguiente"
-    const KEY='ensayo_state';
-    const form=document.getElementById('form1');
-    const input=document.getElementById('banda');
+    const KEY = 'ensayo_state';
+    const form = document.getElementById('form1');
+    const input = document.getElementById('banda');
+    const btn   = document.getElementById('next');
 
-    form.addEventListener('submit', (ev)=>{
+    // Mostrar botón sólo cuando el input tiene texto
+    function toggleNext() {
+      btn.hidden = input.value.trim().length === 0;
+    }
+    // Inicial y en cada cambio
+    toggleNext();
+    input.addEventListener('input', toggleNext);
+
+    form.addEventListener('submit', (ev) => {
       ev.preventDefault();
-      const nombre=(input.value||'').trim();
-      if(!nombre){ alert('No escribiste nada pancho'); input.focus(); return; }
-      let s={}; try{ s=JSON.parse(sessionStorage.getItem(KEY)||'{}'); }catch{}
-      sessionStorage.setItem(KEY, JSON.stringify({...s, banda:nombre}));
-      if(window.startPageLeave) startPageLeave('ensayo2.html'); else location.href='ensayo2.html';
+      const nombre = (input.value || '').trim();
+      if (!nombre) { alert('No escribiste nada pancho'); input.focus(); return; }
+      let s = {};
+      try { s = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+      sessionStorage.setItem(KEY, JSON.stringify({ ...s, banda: nombre }));
+      if (window.startPageLeave) startPageLeave('ensayo2.html'); else location.href = 'ensayo2.html';
     });
 
     // Enter en móviles/desktop
-    input.addEventListener('keydown', (e)=>{
-      if(e.key==='Enter'){ e.preventDefault(); form.requestSubmit(); }
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); form.requestSubmit(); }
     });
   </script>
 </body>

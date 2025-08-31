@@ -79,10 +79,10 @@
       return (s||'')
         .trim()
         .toLocaleLowerCase('es-AR')
-        .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // quita tildes
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     }
 
-    // Detecta duplicados: devuelve { dupKeys:Set, counts:Map, pretty:Map }
+    // Detecta duplicados
     function findDuplicates(values){
       const counts = new Map();
       const pretty = new Map();
@@ -126,7 +126,7 @@
         input.value = properName(st.jugadores[i]);
       }
 
-      // Normalizar a "Capital Inicial" al salir y re-evaluar duplicados
+      // Normalizar al salir
       input.addEventListener('blur', () => {
         input.value = properName(input.value.trim());
         checkDupes(false);
@@ -141,7 +141,18 @@
         }
       });
 
-      // En vivo: evaluar duplicados y botón
+      // ⬅️ Backspace en campo vacío → foco al anterior y caret al final (sin borrar)
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && input.value.length === 0 && i > 0) {
+          e.preventDefault();
+          const prev = inputs[i - 1];
+          prev.focus();
+          const end = prev.value.length;
+          try { prev.setSelectionRange(end, end); } catch {}
+        }
+      });
+
+      // En vivo: botón + duplicados
       input.addEventListener('input', () => {
         toggleNext();
         checkDupes(false);
@@ -178,17 +189,12 @@
     form.addEventListener('submit', (ev) => {
       ev.preventDefault();
 
-      // Nombres en formato lindo para guardar
       const nombres = inputs.map(el => properName(el.value.trim()));
       if (nombres.some(v => !v)) { toggleNext(); return; }
 
-      // Duplicados
       const { dupKeys, counts, pretty } = findDuplicates(nombres);
       if (dupKeys.size > 0) {
-        // Resalta duplicados
         inputs.forEach(el => el.classList.toggle('dup', dupKeys.has(norm(el.value))));
-
-        // Mensaje amigable
         const detalles = [...dupKeys]
           .map(k => `${pretty.get(k)} (${counts.get(k)})`)
           .join(', ');
@@ -196,10 +202,8 @@
           "Sugerencia 💡: se detectaron 2 o más nombres repetidos (" + detalles + ").\n\n" +
           "Para no complicarla, les sugiero agregar un diferenciador, por ejemplo “Juan” y “Juancho”.\n\n" +
           "¿Querés continuar de todos modos?";
-
         dupHint.classList.add('show');
 
-        // Confirmar o volver a corregir
         const seguir = window.confirm(msg);
         if (!seguir) {
           const primeroDup = inputs.find(el => dupKeys.has(norm(el.value)));
@@ -210,7 +214,6 @@
         dupHint.classList.remove('show');
       }
 
-      // Guardar y avanzar
       sessionStorage.setItem(KEY, JSON.stringify({ ...st, jugadores: nombres }));
       if (window.startPageLeave) startPageLeave(NEXT);
       else location.href = NEXT;
