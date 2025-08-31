@@ -184,7 +184,7 @@
           .map(k => `${pretty.get(k)} (${counts.get(k)})`)
           .join(', ');
         const msg =
-          "Sugerencia 💡: se detectaron 2 o más nombres repetidos (" + detalles + ").\n\n" +
+          "Sugerencia 💡: se detectaron nombres repetidos (" + detalles + ").\n\n" +
           "Para no complicarla, les sugiero agregar un diferenciador, por ejemplo “Juan” y “Juancho”.\n\n" +
           "¿Querés continuar de todos modos?";
         dupHint.classList.add('show');
