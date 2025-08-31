@@ -1,23 +1,21 @@
 <!doctype html>
 <html lang="es">
 <head>
-<!-- Favicon – Ensayo -->
-<link rel="icon" type="image/png" href="../images/ensayo.png" sizes="any">
-<link rel="shortcut icon" href="../images/ensayo.png">
-<link rel="apple-touch-icon" href="../images/ensayo.png">
-
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
-<!-- Android / Desktop: color de la barra del navegador -->
-<meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
-
-<!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
+  <!-- Favicon – Ensayo -->
+  <link rel="icon" type="image/png" href="../images/ensayo.png" sizes="any">
+  <link rel="shortcut icon" href="../images/ensayo.png">
+  <link rel="apple-touch-icon" href="../images/ensayo.png">
 
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <!-- Android / Desktop: color de la barra del navegador -->
+  <meta name="theme-color" content="#2c2a89">  <!-- poné #000000 en páginas negras como menu.html -->
+
+  <!-- iOS PWA: usa el fondo de la página y pone iconos blancos -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <title>Ensayo — Paso 2</title>
   <link rel="stylesheet" href="../css/app.css?v=6">
 </head>
@@ -38,47 +36,66 @@
           <option value="6">6</option>
         </select>
 
-        
+        <div class="ensayo-actions">
+          <!-- Oculto por defecto; se muestra si ya hay valor (ej: al volver con “Atrás”) -->
+          <button class="btn btn-primary" id="next" type="submit" hidden>Siguiente →</button>
+        </div>
       </form>
     </div>
   </main>
 
   <script src="../js/nav-transitions.js?v=3"></script>
   <script>
-    (function(){
-      const KEY = 'ensayo_state';
+  (function(){
+    const KEY = 'ensayo_state';
 
-      // Saludo con nombre de la banda (del paso 1)
-      let s = {};
-      try { s = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
-      const nombre = s.banda || 'banda';
-      const h1 = document.getElementById('saludo');
-      if (h1) h1.textContent = `¡Hola ${nombre}! ¿Cuántos son?`;
+    // Saludo con nombre de la banda (del paso 1)
+    let s = {};
+    try { s = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+    const nombre = s.banda || 'banda';
+    const h1 = document.getElementById('saludo');
+    if (h1) h1.textContent = `¡Hola ${nombre}! ¿Cuántos son?`;
 
-      const form = document.getElementById('form2');
-      const sel  = document.getElementById('integrantes');
+    const form = document.getElementById('form2');
+    const sel  = document.getElementById('integrantes');
+    const btn  = document.getElementById('next');
 
-      function saveAndGo(){
-        const val = parseInt(sel.value, 10);
-        if (!Number.isFinite(val) || val < 1) {
-          alert('Elegí la cantidad de integrantes');
-          sel.focus();
-          return;
-        }
-        // Guardar en sessionStorage y avanzar
-        let state = {};
-        try { state = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
-        state.cantidad = val;
-        sessionStorage.setItem(KEY, JSON.stringify(state));
+    function showNextIfSelected(){
+      btn.hidden = !sel.value; // muestra el botón si ya hay una opción elegida
+    }
 
-        if (window.startPageLeave) startPageLeave('ensayo3.html');
-        else location.href = 'ensayo3.html';
+    function saveAndGo(){
+      const val = parseInt(sel.value, 10);
+      if (!Number.isFinite(val) || val < 1) {
+        alert('Elegí la cantidad de integrantes');
+        sel.focus();
+        return;
       }
+      // Guardar en sessionStorage y avanzar
+      let state = {};
+      try { state = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+      state.cantidad = val;
+      sessionStorage.setItem(KEY, JSON.stringify(state));
 
-      // Avanza al cambiar, o con el botón "Siguiente"
-      sel.addEventListener('change', saveAndGo);
-      form.addEventListener('submit', function(e){ e.preventDefault(); saveAndGo(); });
-    })();
+      if (window.startPageLeave) startPageLeave('ensayo3.html');
+      else location.href = 'ensayo3.html';
+    }
+
+    // 1) Selección nueva → avanzar automáticamente
+    sel.addEventListener('change', saveAndGo);
+
+    // 2) Botón/Enter → avanzar si ya hay valor (ej: al volver con “Atrás”)
+    form.addEventListener('submit', (e) => { e.preventDefault(); saveAndGo(); });
+    sel.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && sel.value) { e.preventDefault(); saveAndGo(); }
+    });
+
+    // 3) Al cargar la página o al volver desde el historial, reflejar estado del select
+    showNextIfSelected();                       // primera carga
+    window.addEventListener('pageshow', () => { // bfcache (volver/avanzar)
+      showNextIfSelected();
+    });
+  })();
   </script>
 </body>
 </html>

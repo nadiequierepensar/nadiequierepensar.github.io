@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="es">
 <head>
-<!-- Favicon – Juntada -->
-<link rel="icon" type="image/png" href="../images/juntada.png" sizes="any">
-<link rel="shortcut icon" href="../images/juntada.png">
-<link rel="apple-touch-icon" href="../images/juntada.png">
+  <!-- Favicon – Juntada -->
+  <link rel="icon" type="image/png" href="../images/juntada.png" sizes="any">
+  <link rel="shortcut icon" href="../images/juntada.png">
+  <link rel="apple-touch-icon" href="../images/juntada.png">
 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -46,7 +46,8 @@
         </select>
 
         <div class="ensayo-actions">
-          <button class="btn btn-primary" type="submit">Siguiente →</button>
+          <!-- Oculto por defecto: se muestra si ya hay valor (al volver con “Atrás”) -->
+          <button class="btn btn-primary" id="next" type="submit" hidden>Siguiente →</button>
         </div>
       </form>
     </div>
@@ -58,6 +59,11 @@
       const KEY = 'juntada_state';
       const form = document.getElementById('formJ1');
       const sel  = document.getElementById('integrantes');
+      const btn  = document.getElementById('next');
+
+      function showNextIfSelected(){
+        btn.hidden = !sel.value;
+      }
 
       function saveAndGo(){
         const val = parseInt(sel.value, 10);
@@ -76,9 +82,28 @@
         else location.href = 'juntadas2.html';
       }
 
-      // Avanza al cambiar, o con el botón "Siguiente"
+      // Hidratar select desde el estado (por si se vuelve con “Atrás”)
+      (function hydrate(){
+        let state = {};
+        try { state = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+        const v = state.cantidad != null ? String(state.cantidad) : '';
+        if (v && !sel.value && [...sel.options].some(o => o.value === v)) {
+          sel.value = v;
+        }
+      })();
+
+      // Selección nueva → avanzar automáticamente
       sel.addEventListener('change', saveAndGo);
-      form.addEventListener('submit', function(e){ e.preventDefault(); saveAndGo(); });
+
+      // Botón/Enter → avanzar si ya hay valor (útil al volver con “Atrás”)
+      form.addEventListener('submit', (e) => { e.preventDefault(); saveAndGo(); });
+      sel.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && sel.value) { e.preventDefault(); saveAndGo(); }
+      });
+
+      // Mostrar botón si ya hay valor (carga inicial y bfcache)
+      showNextIfSelected();
+      window.addEventListener('pageshow', showNextIfSelected);
     })();
   </script>
 </body>

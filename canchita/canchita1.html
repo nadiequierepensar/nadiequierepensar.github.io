@@ -1,16 +1,17 @@
 <!doctype html>
 <html lang="es">
 <head>
-<!-- Favicon – Canchita -->
-<link rel="icon" type="image/png" href="../images/canchita.png" sizes="any">
-<link rel="shortcut icon" href="../images/canchita.png">
-<link rel="apple-touch-icon" href="../images/canchita.png">
+  <!-- Favicon – Canchita -->
+  <link rel="icon" type="image/png" href="../images/canchita.png" sizes="any">
+  <link rel="shortcut icon" href="../images/canchita.png">
+  <link rel="apple-touch-icon" href="../images/canchita.png">
+
   <!-- Meta base -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <!-- Android / Desktop: color de la barra del navegador (tema Canchita) -->
-  <meta name="theme-color" content="#2a892e"> <!-- poné #000000 en páginas negras como menu.html -->
+  <meta name="theme-color" content="#2a892e">
 
   <!-- iOS PWA: pantalla completa + status bar translúcida -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -45,7 +46,8 @@
 
         <!-- Acciones -->
         <div class="canchita-actions">
-          <button class="btn btn-primary" type="submit">Siguiente →</button>
+          <!-- Oculto por defecto: se muestra si ya hay valor (ej. al volver con “Atrás”) -->
+          <button class="btn btn-primary" id="next" type="submit" hidden>Siguiente →</button>
         </div>
       </form>
     </div>
@@ -55,11 +57,16 @@
   <script src="../js/nav-transitions.js?v=3"></script>
   <script>
     (function(){
-      const KEY = 'canchita_state_v1';   // clave de estado específica de Canchita
-      const NEXT = 'canchita2.html';     // siguiente paso del flujo
+      const KEY  = 'canchita_state_v1'; // estado específico de Canchita
+      const NEXT = 'canchita2.html';
 
       const form = document.getElementById('form1');
       const sel  = document.getElementById('jugadores');
+      const btn  = document.getElementById('next');
+
+      function showNextIfSelected(){
+        btn.hidden = !sel.value; // muestra el botón si hay una opción elegida
+      }
 
       function saveAndGo(){
         const val = parseInt(sel.value, 10);
@@ -79,9 +86,28 @@
         else location.href = NEXT;
       }
 
-      // Avanza al cambiar, o con el botón "Siguiente"
+      // 1) Selección nueva → avanzar automáticamente
       sel.addEventListener('change', saveAndGo);
-      form.addEventListener('submit', function(e){ e.preventDefault(); saveAndGo(); });
+
+      // 2) Botón/Enter → avanzar si ya hay valor (ej: al volver con “Atrás”)
+      form.addEventListener('submit', (e) => { e.preventDefault(); saveAndGo(); });
+      sel.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && sel.value) { e.preventDefault(); saveAndGo(); }
+      });
+
+      // 3) Al cargar o volver desde el historial, reflejar estado y mostrar botón si corresponde
+      (function hydrateFromState(){
+        let state = {};
+        try { state = JSON.parse(sessionStorage.getItem(KEY) || '{}'); } catch {}
+        if (state.cantidad && !sel.value) {
+          // si hay valor guardado y el select está “vacío”, lo seteamos
+          const v = String(state.cantidad);
+          if ([...sel.options].some(o => o.value === v)) sel.value = v;
+        }
+      })();
+
+      showNextIfSelected();                        // primera carga
+      window.addEventListener('pageshow', showNextIfSelected); // bfcache (volver/avanzar)
     })();
   </script>
 </body>
