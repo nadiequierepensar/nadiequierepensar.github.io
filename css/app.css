@@ -358,32 +358,50 @@ html.is-leaving main { opacity:0; }
 .donate-wrap{
   display:flex;
   justify-content:center;
-  margin:16px 0 8px;          /* arriba de los dos FABs */
+  margin:16px 0 8px;
 }
+
+/* El botón se ajusta al contenido (como foto 2) */
 .donate-btn{
-  display:inline-flex;
-  flex-wrap:wrap;             /* permite que el emoji baje de línea */
-  justify-content:center;     /* centra cada línea del contenido */
-  align-items:center;
-  gap:8px;
+  display:inline-block;                 /* shrink-to-fit */
   padding:12px 18px;
   border-radius:999px;
-  background:#FFD54F;         /* amarillo cafecito */
+  background:#FFD54F;
   color:#1a1a1a;
   font-weight:800;
   text-decoration:none;
   letter-spacing:.2px;
   box-shadow:0 6px 16px rgba(0,0,0,.25);
   transition:transform .06s ease, filter .12s ease;
-}
-.donate-btn .label{ white-space:normal; } /* por si venía con nowrap */
-.donate-btn .emoji{ line-height:1; }      /* evita salto raro vertical */
 
+  /* límites para pantallas chicas */
+  max-width:min(520px, 94vw);           /* no ocupa todo el ancho */
+  text-align:center;                    /* centra el texto */
+}
+
+/* Mostramos SOLO la etiqueta y le “inyectamos” el emoji al final,
+   así el ☕ queda pegado al texto y entra en el clamping */
+.donate-btn .emoji{ display:none; }     /* ocultamos el span del emoji */
+.donate-btn .label{
+  display:-webkit-box;                  /* multiline clamp */
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;                 /* 👉 máximo 2 líneas */
+  overflow:hidden;                      /* recorta con … si hace falta */
+  line-height:1.2;
+  word-break:break-word;
+  hyphens:auto;
+}
+.donate-btn .label::after{
+  content:"  ☕";                        /* emoji pegado al final */
+  white-space:nowrap;                   /* no se separa del texto */
+}
+
+/* Hover/active */
 .donate-btn:hover{ filter:brightness(1.04); transform:translateY(-1px); }
 .donate-btn:active{ transform:translateY(0); }
 
+/* Ajuste fino en pantallas muy chicas */
 @media (max-width:420px){
   .donate-btn{ padding:11px 16px; }
-  /* Si corta en dos líneas, asegura el ☕ centrado ocupando la línea completa */
-  .donate-btn .emoji{ flex-basis:100%; text-align:center; }
 }
+
