@@ -354,14 +354,13 @@ html.is-leaving main { opacity:0; }
   .result-title{ font-size:2.2rem; }
 }
 
-/* ===== Donar / Cafecito ===== */
+/* ===== Donar / Cafecito (ancho al contenido, 2 líneas, sin cortes raros) ===== */
 .donate-wrap{
   display:flex;
   justify-content:center;
   margin:16px 0 8px;
 }
 
-/* El botón se ajusta al contenido (como foto 2) */
 .donate-btn{
   display:inline-block;                 /* shrink-to-fit */
   padding:12px 18px;
@@ -373,35 +372,36 @@ html.is-leaving main { opacity:0; }
   letter-spacing:.2px;
   box-shadow:0 6px 16px rgba(0,0,0,.25);
   transition:transform .06s ease, filter .12s ease;
-
-  /* límites para pantallas chicas */
-  max-width:min(520px, 94vw);           /* no ocupa todo el ancho */
-  text-align:center;                    /* centra el texto */
+  max-width:min(520px, 94vw);
+  text-align:center;
 }
 
-/* Mostramos SOLO la etiqueta y le “inyectamos” el emoji al final,
-   así el ☕ queda pegado al texto y entra en el clamping */
-.donate-btn .emoji{ display:none; }     /* ocultamos el span del emoji */
+/* El emoji lo agregamos dentro del mismo bloque de texto
+   para que quede SIEMPRE pegado al final */
+.donate-btn .emoji{ display:none; }
+
 .donate-btn .label{
   display:-webkit-box;                  /* multiline clamp */
-  -webkit-box-orient:vertical;
-  -webkit-line-clamp:2;                 /* 👉 máximo 2 líneas */
-  overflow:hidden;                      /* recorta con … si hace falta */
-  line-height:1.2;
-  word-break:break-word;
-  hyphens:auto;
-}
-.donate-btn .label::after{
-  content:"  ☕";                        /* emoji pegado al final */
-  white-space:nowrap;                   /* no se separa del texto */
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;                /* 👉 máximo 2 líneas */
+  overflow: hidden;
+
+  /* ❗ No cortar por sílabas ni en medio de palabras normales */
+  hyphens: none;
+  word-break: normal;
+  overflow-wrap: break-word;            /* solo si una palabra es MUY larga */
+  line-height: 1.2;
 }
 
-/* Hover/active */
+/* NBSP antes del emoji para que no se separe del texto */
+.donate-btn .label::after{
+  content: "\00A0☕";                    /* espacio no separable + emoji */
+  white-space: nowrap;
+}
+
 .donate-btn:hover{ filter:brightness(1.04); transform:translateY(-1px); }
 .donate-btn:active{ transform:translateY(0); }
 
-/* Ajuste fino en pantallas muy chicas */
 @media (max-width:420px){
   .donate-btn{ padding:11px 16px; }
 }
-
