@@ -23,6 +23,23 @@ body {
 }
 img { max-width:100%; height:auto; }
 
+/* =========================================================
+   Global: NO cortar palabras (anti-hyphen / anti-break)
+   ========================================================= */
+html, body{
+  hyphens:none;
+  -webkit-hyphens:none;   /* Safari / iOS */
+  -moz-hyphens:none;      /* Firefox */
+  word-break:keep-all;    /* no dividir palabras normales */
+  overflow-wrap:normal;   /* cortar solo en espacios */
+}
+
+/* Utilidad opcional: permitir cortes cuando haga falta (URLs, logs, etc.) */
+.can-break{
+  overflow-wrap:anywhere;
+  word-break:break-word;  /* compatibilidad */
+}
+
 main { min-height:100%; display:flex; flex-direction:column; }
 .container { width:min(720px, 94vw); margin:0 auto; padding:24px 0 88px; }
 
@@ -380,23 +397,24 @@ html.is-leaving main { opacity:0; }
    para que quede SIEMPRE pegado al final */
 .donate-btn .emoji{ display:none; }
 
-.donate-btn .label{
-  display:-webkit-box;                  /* multiline clamp */
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;                /* 👉 máximo 2 líneas */
-  overflow: hidden;
+.donate-btn .label {
+  display:-webkit-box;          /* para clamp */
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
 
-  /* ❗ No cortar por sílabas ni en medio de palabras normales */
-  hyphens: none;
-  word-break: normal;
-  overflow-wrap: break-word;            /* solo si una palabra es MUY larga */
-  line-height: 1.2;
+  /* 🔒 Anti-cortes raros específicos del botón */
+  hyphens:none;
+  -webkit-hyphens:none;
+  word-break:keep-all;          /* no dividir palabras */
+  overflow-wrap:anywhere;       /* sólo si hay cadenas larguísimas sin espacios */
+  line-height:1.2;
 }
 
 /* NBSP antes del emoji para que no se separe del texto */
 .donate-btn .label::after{
-  content: "\00A0☕";                    /* espacio no separable + emoji */
-  white-space: nowrap;
+  content:"\00A0☕";             /* espacio no separable + emoji */
+  white-space:nowrap;
 }
 
 .donate-btn:hover{ filter:brightness(1.04); transform:translateY(-1px); }
@@ -405,23 +423,24 @@ html.is-leaving main { opacity:0; }
 @media (max-width:420px){
   .donate-btn{ padding:11px 16px; }
 }
+
 /* Evitar cortes con guión en títulos (y en general) */
 h1,
 .row-title {
-  hyphens: none;
-  -webkit-hyphens: none;   /* iOS / watchOS */
-  word-break: normal;      /* no partir palabras */
-  overflow-wrap: normal;   /* solo cortar en espacios */
-  text-wrap: balance;      /* líneas más parejas si está soportado */
+  hyphens:none;
+  -webkit-hyphens:none;   /* iOS / watchOS */
+  word-break:normal;      /* no partir palabras */
+  overflow-wrap:normal;   /* solo cortar en espacios */
+  text-wrap:balance;      /* líneas más parejas si está soportado */
 }
 
 /* Ajustes para pantallas ultra pequeñas (relojes, < 280px de ancho) */
 @media (max-width: 280px) {
   h1 { 
-    font-size: 1.6rem;     /* baja un toque para evitar forzar cortes raros */
-    line-height: 1.15;
-    letter-spacing: 0;
+    font-size:1.6rem;     /* baja un toque para evitar forzar cortes raros */
+    line-height:1.15;
+    letter-spacing:0;
   }
-  .row-title { font-size: 1.05rem; }
-  .container { padding-top: 16px; }
+  .row-title { font-size:1.05rem; }
+  .container { padding-top:16px; }
 }
