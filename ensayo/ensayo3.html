@@ -20,8 +20,15 @@
   <title>Ensayo — Paso 3</title>
   <link rel="stylesheet" href="../css/app.css?v=6">
   <style>
-    /* Capital inicial mientras se escribe */
-    .name-input { text-transform: capitalize; }
+    /* ⚠️ Quitamos el capitalize del input para no afectar el placeholder */
+    .name-input { /* text-transform: capitalize; */ }
+
+    /* Aseguramos que el placeholder NO cambie de capitalización */
+    .name-input::placeholder { text-transform: none; }
+    .name-input::-webkit-input-placeholder { text-transform: none; }
+    .name-input::-moz-placeholder { text-transform: none; }
+    .name-input:-ms-input-placeholder { text-transform: none; }
+    .name-input::-ms-input-placeholder { text-transform: none; }
 
     /* Resaltado de campos duplicados */
     .dup {
@@ -110,18 +117,21 @@
       input.maxLength = 22;
       input.autocomplete = 'off';
       input.autocapitalize = 'words';
+      input.inputMode = 'text';
       input.setAttribute('enterkeyhint', i < n - 1 ? 'next' : 'done');
       input.className = 'ensayo-input name-input';
-      input.placeholder = `Nombre del integrante ${i+1}`;
+      input.placeholder = "Nombre del integrante " + (i+1); // ← texto correcto
       if (Array.isArray(s.integrantes) && s.integrantes[i]) {
         input.value = properName(s.integrantes[i]);
       }
 
+      // Formateo al salir del campo
       input.addEventListener('blur', () => {
         input.value = properName(input.value.trim());
         checkDupes(false);
       });
 
+      // Enter: ir al siguiente o enviar
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -130,13 +140,12 @@
         }
       });
 
-      // 🔹 Backspace en campo vacío → ir al anterior (sin borrar)
+      // Backspace en vacío: ir al anterior
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Backspace' && input.value.length === 0 && i > 0) {
           e.preventDefault();
           const prev = inputs[i - 1];
           prev.focus();
-          // coloca cursor al final
           const end = prev.value.length;
           try { prev.setSelectionRange(end, end); } catch {}
         }

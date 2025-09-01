@@ -22,8 +22,15 @@
   <link rel="stylesheet" href="../css/app.css?v=6">
 
   <style>
-    /* Inicial mayúscula mientras se escribe */
-    .name-input { text-transform: capitalize; }
+    /* ❌ Quitamos capitalize para no afectar al placeholder */
+    .name-input { /* text-transform: capitalize; */ }
+
+    /* ✅ Refuerzo: el placeholder debe mostrarse exactamente como se escribe */
+    .name-input::placeholder { text-transform: none; }
+    .name-input::-webkit-input-placeholder { text-transform: none; }
+    .name-input::-moz-placeholder { text-transform: none; }
+    .name-input:-ms-input-placeholder { text-transform: none; }
+    .name-input::-ms-input-placeholder { text-transform: none; }
 
     /* Resaltado de campos duplicados */
     .dup {
@@ -67,14 +74,14 @@
     const KEY  = 'canchita_state_v1';
     const NEXT = 'canchita3.html';
 
-    // Capitaliza primera letra de cada palabra (con soporte unicode)
+    // Capitaliza primera letra de cada palabra (unicode friendly)
     function properName(s){
       const lower = (s||'').toLocaleLowerCase('es-AR');
       return lower.replace(/\b([\p{L}\p{M}])([\p{L}\p{M}]*)/gu,
         (_, a, b) => a.toLocaleUpperCase('es-AR') + b);
     }
 
-    // Normaliza para comparar: trim, minúsculas, sin acentos
+    // Normaliza para comparar
     function norm(s){
       return (s||'')
         .trim()
@@ -120,7 +127,7 @@
       input.autocapitalize = 'words';
       input.setAttribute('enterkeyhint', i < n - 1 ? 'next' : 'done');
       input.className = 'canchita-input name-input';
-      input.placeholder = `Nombre del jugador ${i+1}`;
+      input.placeholder = "Nombre del jugador " + (i+1); // 👈 placeholder correcto
 
       if (Array.isArray(st.jugadores) && st.jugadores[i]) {
         input.value = properName(st.jugadores[i]);
@@ -141,7 +148,7 @@
         }
       });
 
-      // ⬅️ Backspace en campo vacío → foco al anterior y caret al final (sin borrar)
+      // Backspace en vacío → foco al anterior
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Backspace' && input.value.length === 0 && i > 0) {
           e.preventDefault();
@@ -170,7 +177,7 @@
     }
     toggleNext();
 
-    // Marca/desmarca duplicados y muestra hint (no bloqueante)
+    // Marca/desmarca duplicados y muestra hint
     function checkDupes(showHint){
       const vals = inputs.map(el => el.value);
       const { dupKeys } = findDuplicates(vals);
@@ -185,7 +192,7 @@
       return any;
     }
 
-    // Submit → validar duplicados, confirmar y guardar
+    // Submit
     form.addEventListener('submit', (ev) => {
       ev.preventDefault();
 

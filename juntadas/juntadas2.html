@@ -19,8 +19,15 @@
   <title>Juntadas — Paso 2</title>
   <link rel="stylesheet" href="../css/app.css?v=6">
   <style>
-    /* Mostrar cada palabra con inicial en mayúscula mientras se escribe */
-    .name-input{ text-transform: capitalize; }
+    /* ❗️No usamos capitalize para no afectar el placeholder */
+    .name-input { /* text-transform: capitalize; */ }
+
+    /* Refuerzo: el placeholder debe verse exactamente como está escrito */
+    .name-input::placeholder { text-transform: none; }
+    .name-input::-webkit-input-placeholder { text-transform: none; }
+    .name-input::-moz-placeholder { text-transform: none; }
+    .name-input:-ms-input-placeholder { text-transform: none; }
+    .name-input::-ms-input-placeholder { text-transform: none; }
 
     /* Resaltado de campos duplicados */
     .dup {
@@ -63,7 +70,7 @@
   (function(){
     const KEY = 'juntada_state';
 
-    // Pasa a minúsculas y capitaliza primera letra de cada palabra
+    // Pasa a minúsculas y capitaliza primera letra de cada palabra al guardar
     function properName(s){
       const lower = (s||'').toLocaleLowerCase('es-AR');
       return lower.replace(/\b([\p{L}\p{M}])([\p{L}\p{M}]*)/gu,
@@ -75,7 +82,7 @@
       return (s||'')
         .trim()
         .toLocaleLowerCase('es-AR')
-        .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // quita tildes
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     }
 
     // Devuelve { dupKeys:Set, counts:Map, pretty:Map } de duplicados
@@ -116,7 +123,7 @@
       input.autocapitalize = 'words';
       input.setAttribute('enterkeyhint', i < n - 1 ? 'next' : 'done');
       input.className = 'ensayo-input name-input';
-      input.placeholder = `Nombre de la persona ${i+1}`;
+      input.placeholder = "Nombre de la persona " + (i+1); // ← minúsculas correctas
       if (Array.isArray(s.integrantes) && s.integrantes[i]) {
         input.value = properName(s.integrantes[i]);
       }
