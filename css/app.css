@@ -405,3 +405,23 @@ html.is-leaving main { opacity:0; }
 @media (max-width:420px){
   .donate-btn{ padding:11px 16px; }
 }
+/* Evitar cortes con guión en títulos (y en general) */
+h1,
+.row-title {
+  hyphens: none;
+  -webkit-hyphens: none;   /* iOS / watchOS */
+  word-break: normal;      /* no partir palabras */
+  overflow-wrap: normal;   /* solo cortar en espacios */
+  text-wrap: balance;      /* líneas más parejas si está soportado */
+}
+
+/* Ajustes para pantallas ultra pequeñas (relojes, < 280px de ancho) */
+@media (max-width: 280px) {
+  h1 { 
+    font-size: 1.6rem;     /* baja un toque para evitar forzar cortes raros */
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+  .row-title { font-size: 1.05rem; }
+  .container { padding-top: 16px; }
+}
